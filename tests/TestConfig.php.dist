@@ -1,0 +1,24 @@
+<?php
+/**
+ * zf skeltonアプリ上での使用を想定
+ * 
+ */
+//defined('ZF2_PATH') or define('ZF2_PATH', __DIR__ . '/../../../vendor/zendframework/zendframework/library');
+
+return array(
+    'modules' => array(
+        'Flower',
+        'Page',
+        'NpDocument',
+    ),
+    'module_listener_options' => array(
+        'config_glob_paths' => array(
+            '../../../config/autoload/{,*.}{global,local}.php',
+            'config/autoload/{,*.}{global,local,config}.php',
+        ),
+        'module_paths' => array(
+            //'module',
+            //'vendor',
+        ),
+    ),
+);
