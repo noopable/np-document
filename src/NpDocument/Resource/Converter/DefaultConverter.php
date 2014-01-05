@@ -27,7 +27,13 @@ class DefaultConverter implements PersistenceConverterInterface{
      * @var string
      */
     protected $keyPattern = '';
-    protected $delimiter = '';
+    
+    /**
+     *
+     * @see NpDocument\Resource\ResourceClass\Resource::getDelimiter
+     * @var string
+     */
+    protected $resourceIdDelimiter = '_';
     protected $propDelimiter = '+';
     protected $resourceTypeShortName = 'type';
     protected $propertyShortName = 'props';
