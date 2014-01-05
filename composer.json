@@ -19,7 +19,7 @@
         }
     ],
     "require": {
-        "php": ">=5.5.4",
+        "php": ">=5.4.10",
         "noopable/flower": "dev-master",
         "zendframework/zend-json": "dev-master"
     },
