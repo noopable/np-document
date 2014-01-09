@@ -4,11 +4,65 @@ return array(
         //リソースfactoryでブリッジ指定したサービスは、Aliasを張ることでDIで使用可能になる。
         //このalias指定がないと、パラメーターとして指定したときインスタンスと解釈してくれない。
         'dbAdapter' => 'Zend\Db\Adapter\Adapter',
-        'ItemTable' => 'Zend\Db\TableGateway\TableGateway',
-        'ClientTable' =>   'Zend\Db\TableGateway\TableGateway',
+        'DocumentTable' =>   'Zend\Db\TableGateway\TableGateway',
+        'SectionTable' => 'Zend\Db\TableGateway\TableGateway',
         'SandboxTable' =>   'Zend\Db\TableGateway\TableGateway',
     ),
     'preferences' => array(
+    ),    
+    'DocumentTable' => array(
+        'parameters' => array(
+            'table' => 'document',
+            'adapter' => 'dbAdapter',
+        ),
+    ),
+    'NpDocument\Model\Document\Document' => array(
+        'parameters' => array(
+            'array' => array(),
+        ),
+    ),
+    'NpDocument\Model\Repository\Document' => array(
+        'parameters' => array(
+            'name' => 'document',
+            'entityPrototype' => 'NpDocument\Model\Document\Document',
+            'tableGateway' => 'DocumentTable',
+        ),
+        'injections' => array(
+            'setSectionPluginManager' => array(
+                array('NpDocument\Model\Section\SectionPluginManager'),
+            ),
+        ),
+    ),
+    'SectionTable' => array(
+        'parameters' => array(
+            'table' => 'document',
+            'adapter' => 'dbAdapter',
+        ),
+    ),
+    'NpDocument\Model\Section\Section' => array(
+        'parameters' => array(
+            'array' => array(),
+        ),
+    ),
+    'NpDocument\Model\Repository\Section' => array(
+        'parameters' => array(
+            'name' => 'section',
+            'entityPrototype' => 'NpDocument\Model\Section\Section',
+            'tableGateway' => 'SectionTable',
+            'sectionPluginManger' => 'NpDocument\Model\Section\SectionPluginManager',
+        ),
+    ),
+    'NpDocument\Model\Section\SectionPluginManager' => array(
+        'injections' => array(
+            'setInvokableClass' => array(
+                array('name' => 'generic', 'invokableClass' => 'NpDocument\Model\Section\Section'),
+            ),
+        ),
+    ),
+    'NpDocument\Model\Sandbox\Sandbox' => array(
+        'parameters' => array(
+            'array' => array(),
+        ),
     ),
     'SandboxTable' => array(
         'parameters' => array(
@@ -21,32 +75,6 @@ return array(
             'name' => 'sandbox',
             'entityPrototype' => 'NpDocument\Model\Sandbox\Sandbox',
             'tableGateway' => 'SandboxTable',
-        ),
-    ),
-    'ClientTable' => array(
-        'parameters' => array(
-            'table' => 'client',
-            'adapter' => 'dbAdapter',
-        ),
-    ),
-    //'Zend\InputFilter\InputFilter' => array(),
-    'NpDocument\Model\Client\Client' => array(
-        'parameters' => array(
-            'array' => array(),
-        ),
-    ),
-    'NpDocument\Model\Repository\ClientDb' => array(
-        'parameters' => array(
-            'name' => 'client',
-            'entityPrototype' => 'NpDocument\Model\Client\Client',
-            'tableGateway' => 'ClientTable',
-        ),
-    ),
-    'NpDocument\Model\Repository\ClientSession' => array(
-        'parameters' => array(
-            'name' => 'cart',
-            'entityPrototype' => 'NpDocument\Model\Client\Client',
-            'namespace' => 'NpDocument\Client',
         ),
     ),
 );

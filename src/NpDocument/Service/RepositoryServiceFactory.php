@@ -12,13 +12,13 @@ class RepositoryServiceFactory extends AbstractRSF {
      *
      * @var string
      */
-    protected $configId = 'np-document_repositories';
+    protected $configId = 'np_document_repositories';
     
     /**
      *
      * @var string
      */
-    protected $managerClass = 'NpDocument\Service\RepositoryPluginManager';
+    protected $managerClass = 'NpDocument\Model\Repository\RepositoryPluginManager';
     
     /**
      * whether or not use DependencyInjector

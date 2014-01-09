@@ -1,12 +1,20 @@
 <?php
-namespace NpDocument\Service;
 
+/*
+ *
+ *
+ * @copyright Copyright (c) 2013-2014 KipsProduction (http://www.kips.gr.jp)
+ * @license   http://www.kips.gr.jp/newbsd/LICENSE.txt New BSD License
+ */
+namespace NpDocument\Model\Repository;
+
+use Flower\Model\Service\RepositoryPluginManager as AbstractRepositoryPluginManager;
 /**
  * Description of RepositoryPluginManager
  *
  * @author tomoaki
  */
-class RepositoryPluginManager extends \Flower\Model\Service\RepositoryPluginManager {
+class RepositoryPluginManager extends AbstractRepositoryPluginManager {
     
     /**
      * クラスを配置する namespace as prefix
