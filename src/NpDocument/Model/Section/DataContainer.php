@@ -41,9 +41,9 @@ class DataContainer extends AbstractEntity
         'section_note' => 'section_note',
     );
     
-    public function setIdentifier(array $ids)
+    public function setIdentifier(array $identifier)
     {
-        $this->identifier = $ids;
+        $this->identifier = $identifier;
     }
     
     public function getIdentifier()
