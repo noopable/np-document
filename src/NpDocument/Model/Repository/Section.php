@@ -1,9 +1,14 @@
 <?php
 namespace NpDocument\Model\Repository;
 
+
 use Flower\Model\AbstractDbTableRepository;
+use Flower\Model\AbstractEntity;
 use Zend\Db\TableGateway\TableGatewayInterface;
+use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use NpDocument\Exception\RuntimeException;
+use NpDocument\Exception\DomainException;
+use NpDocument\Model\Section\Config;
 use NpDocument\Model\Section\SectionPluginManager;
 
 class Section extends AbstractDbTableRepository
@@ -62,12 +67,25 @@ class Section extends AbstractDbTableRepository
         if (!isset($params['data_container'])) {
             $params['data_container'] = $this->create();
         }
+        $config = new Config($params);
 
-        return $this->getSectionPluginManager()->get($type, $params);
+        return $this->getSectionPluginManager()->get($type, $config);
     }
 
     public function createSectionWithDataContainer(AbstractEntity $dataContainer)
     {
-        //$dataContainerはセクションクラスショートネームを持っている条件
+        if (!isset($dataContainer->section_class)) {
+            throw new DomainException('column section_class should be valid class shortname');
+        }
+        $type = $dataContainer->section_class;
+        $params = array('data_container' => $dataContainer);
+        $config = new Config($params);
+        try {
+            $section = $this->getSectionPluginManager()->get($type, $config);
+        } catch (ServiceNotFoundException $ex) {
+            throw new DomainException('try to create section from a data container. but cannot find section class named ' . $type, 0, $ex);
+        }
+        
+        return $section;
     }
 }
