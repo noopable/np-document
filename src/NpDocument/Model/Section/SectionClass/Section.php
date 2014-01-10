@@ -9,10 +9,11 @@
 namespace NpDocument\Model\Section\SectionClass;
 
 use Flower\Model\AbstractEntity;
+use NpDocument\Model\Section\Config;
 use NpDocument\Model\Section\DataContainer;
 use NpDocument\Model\Section\SectionInterface;
 
-class Section extends AbstractEntity implements SectionInterface
+class Section implements SectionInterface
 {
     protected $authenticated = false;
     
@@ -21,12 +22,14 @@ class Section extends AbstractEntity implements SectionInterface
      * @var Flower\Model\AbstractEntity
      */
     protected $dataContainer;
-
-    public function getIdentifier()
+    
+    public function __construct(Config $config = null)
     {
-        return array('domain_id', 'document_id', 'section_name', 'section_rev');
+        if (null !== $config) {
+            $config->configure($this);
+        }
     }
-
+    
     /**
      * 
      * @return ArrayObject
@@ -44,18 +47,19 @@ class Section extends AbstractEntity implements SectionInterface
         $this->dataContainer = $dataContainer;
     }
     
-    public function offsetSet($name, $value)
+    public function __set($name, $value)
     {
         return $this->getDataContainer()->offsetSet($name, $value);
     }
     
-    public function offsetGet($name)
+    public function __get($name)
     {
         return $this->getDataContainer()->offsetGet($name);
     }
     
-    public function offsetExists($name)
+    public function __isset($name)
     {
         return $this->getDataContainer()->offsetExists($name);
     }
+
 }

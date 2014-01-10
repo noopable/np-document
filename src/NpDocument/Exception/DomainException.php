@@ -12,5 +12,5 @@ namespace NpDocument\Exception;
  *
  * @author tomoaki
  */
-class RuntimeException extends \RuntimeException implements ExceptionInterface{
+class DomainException extends \DomainException implements ExceptionInterface{
 }

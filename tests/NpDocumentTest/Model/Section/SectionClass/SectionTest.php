@@ -30,12 +30,5 @@ class SectionTest extends AbstractSection
     {
     }
 
-    /**
-     * @covers NpDocument\Model\Section\SectionClass\Section::getIdentifier
-     */
-    public function testGetIdentifier()
-    {
-        $this->assertEquals(array('domain_id', 'document_id', 'section_name', 'section_rev'), $this->object->getIdentifier());
-    }
 
 }

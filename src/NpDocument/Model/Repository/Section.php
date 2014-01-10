@@ -52,5 +52,18 @@ class Section extends AbstractDbTableRepository
         }
         return $this->sectionPluginManager;
     }
+    
+    public function createSection($type = null, array $params = array())
+    {
+        if (null === $type) {
+            $type = 'Section';
+        }
+        
+        if (!isset($params['data_container'])) {
+            $params['data_container'] = $this->create();
+        }
+
+        return $this->getSectionPluginManager()->get($type, $config);
+    }
 
 }

@@ -23,11 +23,6 @@ abstract class AbstractSection extends \PHPUnit_Framework_TestCase
     }
     
     /**
-     * @covers NpDocument\Model\Section\SectionInterface::getIdentifier
-     */
-    abstract public function testGetIdentifier();
-    
-    /**
      * Tears down the fixture, for example, closes a network connection.
      * This method is called after a test is executed.
      */
@@ -68,42 +63,43 @@ abstract class AbstractSection extends \PHPUnit_Framework_TestCase
     
     /**
      * @depends testSetDataContainer
-     * @covers NpDocument\Model\Section\SectionClass\Section::offsetExists
+     * @covers NpDocument\Model\Section\SectionClass\Section::__isset
      */
-    public function testOffsetExists()
+    public function test__isset()
     {
         //not set property
         $this->assertFalse(isset($this->object->foo), 'normally isset');
-        $this->assertFalse($this->object->offsetExists('foo'), 'no action no set');
+        $this->assertFalse($this->object->__isset('foo'), 'no action has none');
         //without data container
         $this->object->foo = 'bar';
         $this->assertTrue(isset($this->object->foo), 'isset property');
-        $this->assertTrue($this->object->offsetExists('foo'), 'object has property');
+        $this->assertTrue($this->object->__isset('foo'), 'object has property');
         
         //with data container late set
         $dataContainer = new DataContainer;
         $this->object->setDataContainer($dataContainer);
-        $this->assertFalse(isset($this->object->foo), 'isset with replaced data container');
-        $this->assertFalse($this->object->offsetExists('foo'), 'with replaced data container');
+        $this->assertFalse(isset($this->object->foo), 'replaced data container lost previous index');
+        $this->assertFalse($this->object->__isset('foo'), 'with replaced data container');
         
         //with data container having property
         $dataContainer->foo = 'bar';
-        $this->assertTrue(isset($this->object->foo), 'data container having property');
-        $this->assertTrue($this->object->offsetExists('foo'), 'data container having property');
+        $this->assertTrue(isset($this->object->foo), 'data container having property1');
+        $this->assertTrue($this->object->__isset('foo'), 'data container having property2');
         
     }
     
     /**
      * 
-     * @depends testOffsetExists
-     * @covers NpDocument\Model\Section\SectionClass\Section::offsetGet
+     * @depends test__isset
+     * @covers NpDocument\Model\Section\SectionClass\Section::__get
      */
-    public function testOffsetGet()
+    public function test__get()
     {
         $this->object->foo = 'bar';
-        //property access equals to offsetGet
+        //property access equals to __get
+        
         $this->assertEquals('bar', $this->object->foo);
-        $this->assertEquals('bar', $this->object->offsetGet('foo'));
+        $this->assertEquals('bar', $this->object->__get('foo'));
         
         $dataContainer = new DataContainer;
         $this->object->setDataContainer($dataContainer);
@@ -116,9 +112,9 @@ abstract class AbstractSection extends \PHPUnit_Framework_TestCase
     }
     
     /**
-     * @covers NpDocument\Model\Section\SectionClass\Section::offsetSet
+     * @covers NpDocument\Model\Section\SectionClass\Section::__Set
      */
-    public function testOffsetSet()
+    public function test__set()
     {
         $dataContainer = $this->getMock('Flower\Model\AbstractEntity');
         $dataContainer->expects($this->once())
