@@ -1,7 +1,7 @@
 <?php
 namespace NpDocumentTest\Model\Section;
 
-use NpDocument\Model\Section\Section;
+use NpDocument\Model\Section\SectionClass\Section;
 use NpDocument\Model\Section\SectionPluginManager;
 
 /**
@@ -61,7 +61,7 @@ class SectionPluginManagerTest extends \PHPUnit_Framework_TestCase
                     ),
                     'injections' => array(
                         'setInvokableClass' => array(
-                            array('name' => 'generic', 'invokableClass' => 'NpDocument\Model\Section\Section'),
+                            array('name' => 'generic', 'invokableClass' => 'NpDocument\Model\Section\SectionClass\Section'),
                         ),
                     ),
                 ),
@@ -74,6 +74,6 @@ class SectionPluginManagerTest extends \PHPUnit_Framework_TestCase
         $plugin = $di->get('NpDocument\Model\Section\SectionPluginManager');
         $this->assertInstanceOf('NpDocument\Model\Section\SectionPluginManager', $plugin);
         $instance = $plugin->get('generic');
-        $this->assertInstanceOf('NpDocument\Model\Section\Section', $instance);
+        $this->assertInstanceOf('NpDocument\Model\Section\SectionClass\Section', $instance);
     }
 }

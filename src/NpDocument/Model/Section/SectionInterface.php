@@ -9,9 +9,12 @@
 
 namespace NpDocument\Model\Section;
 
+use Flower\Model\AbstractEntity;
 /**
  *
  * @author tomoaki
  */
 interface SectionInterface {
+    public function setDataContainer(AbstractEntity $dataContainer);
+    public function getDataContainer();
 }

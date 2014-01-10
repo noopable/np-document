@@ -42,7 +42,7 @@ class RepositoryPluginManagerTest extends \PHPUnit_Framework_TestCase
                 'NpDocument\Model\Repository\Section' => array(
                    'parameters' => array(
                        'name' => 'section',
-                       'entityPrototype' => 'NpDocument\Model\Section\Section',
+                       'entityPrototype' => 'NpDocument\Model\Section\DataContainer',
                        'tableGateway' => $this->getMock('Zend\Db\TableGateway\TableGatewayInterface'),
                    ),
                    'injections' => array(
@@ -54,7 +54,7 @@ class RepositoryPluginManagerTest extends \PHPUnit_Framework_TestCase
                'NpDocument\Model\Section\SectionPluginManager' => array(
                    'injections' => array(
                        'setInvokableClass' => array(
-                           array('name' => 'generic', 'invokableClass' => 'NpDocument\Model\Section\Section'),
+                           array('name' => 'generic', 'invokableClass' => 'NpDocument\Model\Section\SectionClass\Section'),
                        ),
                    ),
                ),

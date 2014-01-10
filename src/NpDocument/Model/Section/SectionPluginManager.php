@@ -18,7 +18,7 @@ use NpDocument\Model\Section\SectionInterface;
  */
 class SectionPluginManager extends AbstractPluginManager {
     protected $invokableClasses = array(
-       //'generic' => 'NpDocument\Model\Section\Section',
+       //'generic' => 'NpDocument\Model\Section\SectionClass\Section',
     );
     
     /**

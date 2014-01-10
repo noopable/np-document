@@ -10,12 +10,13 @@ namespace NpDocument\Model\Section;
 
 use Flower\Model\AbstractEntity;
 
-class Section extends AbstractEntity implements SectionInterface
+class DataContainer extends AbstractEntity
 {
     protected $authenticated = false;
-
+    
     public function getIdentifier()
     {
         return array('domain_id', 'document_id', 'section_name', 'section_rev');
     }
+
 }

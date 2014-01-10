@@ -39,7 +39,7 @@ return array(
             'adapter' => 'dbAdapter',
         ),
     ),
-    'NpDocument\Model\Section\Section' => array(
+    'NpDocument\Model\Section\DataContainer' => array(
         'parameters' => array(
             'array' => array(),
         ),
@@ -47,7 +47,7 @@ return array(
     'NpDocument\Model\Repository\Section' => array(
         'parameters' => array(
             'name' => 'section',
-            'entityPrototype' => 'NpDocument\Model\Section\Section',
+            'entityPrototype' => 'NpDocument\Model\Section\DataContainer',
             'tableGateway' => 'SectionTable',
             'sectionPluginManger' => 'NpDocument\Model\Section\SectionPluginManager',
         ),
@@ -55,7 +55,7 @@ return array(
     'NpDocument\Model\Section\SectionPluginManager' => array(
         'injections' => array(
             'setInvokableClass' => array(
-                array('name' => 'generic', 'invokableClass' => 'NpDocument\Model\Section\Section'),
+                array('name' => 'generic', 'invokableClass' => 'NpDocument\Model\Section\SectionClass\Section'),
             ),
         ),
     ),
