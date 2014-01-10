@@ -63,7 +63,11 @@ class Section extends AbstractDbTableRepository
             $params['data_container'] = $this->create();
         }
 
-        return $this->getSectionPluginManager()->get($type, $config);
+        return $this->getSectionPluginManager()->get($type, $params);
     }
 
+    public function createSectionWithDataContainer(AbstractEntity $dataContainer)
+    {
+        //$dataContainerはセクションクラスショートネームを持っている条件
+    }
 }

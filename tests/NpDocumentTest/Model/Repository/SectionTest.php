@@ -43,7 +43,7 @@ class SectionTest extends \PHPUnit_Framework_TestCase
         $prop->setAccessible(true);
         $pluginManager = new SectionPluginManager;
         $this->object->setSectionPluginManager($pluginManager);
-        $this->assertEquals($pluginManager, $prop->getValue($this->object));
+        $this->assertSame($pluginManager, $prop->getValue($this->object));
     }
 
     /**

@@ -9,22 +9,37 @@
 
 namespace NpDocument\Model\Section;
 
-use Zend\Stdlib\AbstractOptions;
+use Flower\Model\AbstractEntity;
 /**
  * Configure Section object
  *
  * @author tomoaki
  */
-class Config extends AbstractOptions {
+class Config {
 
+    /**
+     *
+     * @var array
+     */
+    protected $config;
+    
+    public function __construct(array $config)
+    {
+        $this->config = $config;
+    }
+    
     public function configure(SectionInterface $section)
     {
-        if (isset($this->data_container)) {
-            if ($this->data_container instanceof AbstractEntity) {
-                $section->setDataContainer($this->data_container);
-            } elseif (is_string($this->data_container) && class_exists($this->data_container)) {
-                $section->setDataContainer(new $this->data_container);
-            } 
+        if (isset($this->config['data_container'])) {
+            if (is_string($this->config['data_container']) && class_exists($this->config['data_container'])) {
+                $dataContainer = new $this->config['data_container'];
+            } else {
+                $dataContainer = $this->config['data_container'];
+            }
+            
+            if ($dataContainer instanceof AbstractEntity) {
+                $section->setDataContainer($dataContainer);
+            }
         }
     }
 }

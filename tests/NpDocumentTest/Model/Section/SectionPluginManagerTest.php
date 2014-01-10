@@ -1,6 +1,8 @@
 <?php
 namespace NpDocumentTest\Model\Section;
 
+use NpDocument\Model\Section\Config;
+use NpDocument\Model\Section\DataContainer;
 use NpDocument\Model\Section\SectionClass\Section;
 use NpDocument\Model\Section\SectionPluginManager;
 
@@ -51,6 +53,20 @@ class SectionPluginManagerTest extends \PHPUnit_Framework_TestCase
         $this->object->get('generic');
     }
     
+    public function testGetWithParams()
+    {
+        $dataContainer = new DataContainer;
+        $config = array(
+            'data_container' => $dataContainer,
+        );
+        $params = new Config($config);
+        $this->object->setInvokableClass('generic', 'NpDocument\Model\Section\SectionClass\Section');
+        $section = $this->object->get('generic', $params);
+        $this->assertInstanceOf('NpDocument\Model\Section\SectionInterface', $section);
+        $injectedDataContainer = $section->getDataContainer();
+        $this->assertSame($dataContainer, $injectedDataContainer);
+    }
+    
     public function testByDiGet()
     {
         $config = array(
@@ -75,5 +91,22 @@ class SectionPluginManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('NpDocument\Model\Section\SectionPluginManager', $plugin);
         $instance = $plugin->get('generic');
         $this->assertInstanceOf('NpDocument\Model\Section\SectionClass\Section', $instance);
+        return $plugin;
+    }
+    
+    /**
+     * @depends testByDiGet
+     */
+    public function testByDiGetWithParams($plugin)
+    {
+        $dataContainer = new DataContainer;
+        $config = array(
+            'data_container' => $dataContainer,
+        );
+        $params = new Config($config);
+        $section = $plugin->get('generic', $params);
+        $this->assertInstanceOf('NpDocument\Model\Section\SectionInterface', $section);
+        $injectedDataContainer = $section->getDataContainer();
+        $this->assertSame($dataContainer, $injectedDataContainer);
     }
 }

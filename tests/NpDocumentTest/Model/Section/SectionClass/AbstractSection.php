@@ -46,7 +46,7 @@ abstract class AbstractSection extends \PHPUnit_Framework_TestCase
         $customContainer = $this->getMock('Flower\Model\AbstractEntity');
         $prop->setValue($this->object, $customContainer);
 
-        $this->assertEquals($customContainer, $this->object->getDataContainer());
+        $this->assertSame($customContainer, $this->object->getDataContainer());
     }
 
     /**
@@ -58,7 +58,7 @@ abstract class AbstractSection extends \PHPUnit_Framework_TestCase
     {
         $customContainer = $this->getMock('Flower\Model\AbstractEntity');
         $this->object->setDataContainer($customContainer);
-        $this->assertEquals($customContainer, $this->object->getDataContainer());
+        $this->assertSame($customContainer, $this->object->getDataContainer());
     }
     
     /**
