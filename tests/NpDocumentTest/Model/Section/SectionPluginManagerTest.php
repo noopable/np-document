@@ -32,7 +32,48 @@ class SectionPluginManagerTest extends \PHPUnit_Framework_TestCase
     protected function tearDown()
     {
     }
+    
+    /**
+     * @covers NpDocument\Model\Section\SectionPluginManager::setPluginNameSpace
+     */
+    public function testSetPluginNameSpace()
+    {
+        $ref = new \ReflectionObject($this->object);
+        $prop = $ref->getProperty('pluginNameSpace');
+        $prop->setAccessible(true);
+        $this->object->setPluginNameSpace('NpDocumentTest\Foo');
+        $this->assertEquals('NpDocumentTest\Foo', $prop->getValue($this->object));
+    }
 
+    /**
+     * @depends testSetPluginNameSpace
+     * @covers NpDocument\Model\Section\SectionPluginManager::getPluginNameSpace
+     */
+    public function testGetPluginNameSpace()
+    {
+        $this->assertEquals('NpDocument\Model\Section\SectionClass', $this->object->getPluginNameSpace());
+        $this->object->setPluginNameSpace('NpDocumentTest\Foo');
+        $this->assertEquals('NpDocumentTest\Foo', $this->object->getPluginNameSpace());
+    }
+
+    /**
+     * @covers NpDocument\Model\Section\SectionPluginManager::byName
+     */
+    public function testByName()
+    {
+        $section = $this->object->byName('Section');
+        $this->assertInstanceOf('NpDocument\Model\Section\SectionClass\Section', $section);
+    }
+    
+    /**
+     * @covers NpDocument\Model\Section\SectionPluginManager::get
+     */
+    public function testGet()
+    {
+        $section = $this->object->get('Section');
+        $this->assertInstanceOf('NpDocument\Model\Section\SectionClass\Section', $section);
+    }
+    
     /**
      * @covers NpDocument\Model\Section\SectionPluginManager::validatePlugin
      */
