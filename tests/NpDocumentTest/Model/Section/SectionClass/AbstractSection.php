@@ -62,6 +62,9 @@ abstract class AbstractSection extends \PHPUnit_Framework_TestCase
     }
     
     /**
+     * __isset と isset($object)は等価であり内部DataContainerを使っているの確認
+     * DataContainerの仕様はチェック対象ではない
+     * 
      * @depends testSetDataContainer
      * @covers NpDocument\Model\Section\SectionClass\Section::__isset
      */
@@ -70,21 +73,25 @@ abstract class AbstractSection extends \PHPUnit_Framework_TestCase
         //not set property
         $this->assertFalse(isset($this->object->foo), 'normally isset');
         $this->assertFalse($this->object->__isset('foo'), 'no action has none');
-        //without data container
-        $this->object->foo = 'bar';
-        $this->assertTrue(isset($this->object->foo), 'isset property');
-        $this->assertTrue($this->object->__isset('foo'), 'object has property');
+        /**
+         * without setting a data container, use default container
+         * container claimes valid column name 
+         * @see NpDocument\Model\Section\DataContainer
+         */
+        $this->object->content = 'bar';
+        $this->assertTrue(isset($this->object->content), 'isset property');
+        $this->assertTrue($this->object->__isset('content'), 'object has property');
         
         //with data container late set
         $dataContainer = new DataContainer;
         $this->object->setDataContainer($dataContainer);
-        $this->assertFalse(isset($this->object->foo), 'replaced data container lost previous index');
-        $this->assertFalse($this->object->__isset('foo'), 'with replaced data container');
+        $this->assertFalse(isset($this->object->content), 'replaced data container lost previous index');
+        $this->assertFalse($this->object->__isset('content'), 'with replaced data container');
         
         //with data container having property
-        $dataContainer->foo = 'bar';
-        $this->assertTrue(isset($this->object->foo), 'data container having property1');
-        $this->assertTrue($this->object->__isset('foo'), 'data container having property2');
+        $dataContainer->content = 'bar';
+        $this->assertTrue(isset($this->object->content), 'data container having property1');
+        $this->assertTrue($this->object->__isset('content'), 'data container having property2');
         
     }
     
@@ -95,20 +102,25 @@ abstract class AbstractSection extends \PHPUnit_Framework_TestCase
      */
     public function test__get()
     {
-        $this->object->foo = 'bar';
+        /**
+         * Why we use key name "content"?
+         * DataContainer claimes valid column name 
+         * @see NpDocument\Model\Section\DataContainer
+         */
+        $this->object->content = 'bar';
         //property access equals to __get
-        
-        $this->assertEquals('bar', $this->object->foo);
-        $this->assertEquals('bar', $this->object->__get('foo'));
+
+        $this->assertEquals('bar', $this->object->content);
+        $this->assertEquals('bar', $this->object->__get('content'));
         
         $dataContainer = new DataContainer;
         $this->object->setDataContainer($dataContainer);
-        $this->assertFalse(isset($this->object->foo));
+        $this->assertFalse(isset($this->object->content));
         
         //property accesses dataContainer's property
-        $dataContainer->foo = 'baz';
-        $this->assertNotEquals('bar', $this->object->foo);
-        $this->assertEquals('baz', $this->object->foo);
+        $dataContainer->content = 'baz';
+        $this->assertNotEquals('bar', $this->object->content);
+        $this->assertEquals('baz', $this->object->content);
     }
     
     /**
@@ -119,8 +131,8 @@ abstract class AbstractSection extends \PHPUnit_Framework_TestCase
         $dataContainer = $this->getMock('Flower\Model\AbstractEntity');
         $dataContainer->expects($this->once())
                 ->method('offsetSet')
-                ->with($this->equalTo('foo'), $this->equalTo('bar'));
+                ->with($this->equalTo('content'), $this->equalTo('bar'));
         $this->object->setDataContainer($dataContainer);
-        $this->object->foo = 'bar';
+        $this->object->content = 'bar';
     }
 }

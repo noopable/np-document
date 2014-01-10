@@ -109,27 +109,27 @@ class SectionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers NpDocument\Model\Repository\Section::createSectionWithDataContainer
+     * @covers NpDocument\Model\Repository\Section::retrieveSectionFromDataContainer
      */
-    public function testCreateSectionWithDataContainer()
+    public function testRetrieveSectionFromDataContainer()
     {
         $pluginManager = new SectionPluginManager;
         $this->object->setSectionPluginManager($pluginManager);
         $dataContainer = new DataContainer;
         $dataContainer->section_class = 'section';
-        $section = $this->object->createSectionWithDataContainer($dataContainer);
+        $section = $this->object->retrieveSectionFromDataContainer($dataContainer);
         $this->assertInstanceOf('NpDocument\Model\Section\SectionClass\Section', $section);
     }
     
     /**
      * @expectedException NpDocument\Exception\DomainException
      */
-    public function testCreateSectionWithBareboneDataContainer()
+    public function testRetrieveSectionFromBareboneDataContainer()
     {
         $pluginManager = new SectionPluginManager;
         $this->object->setSectionPluginManager($pluginManager);
         $dataContainer = new DataContainer;
-        $section = $this->object->createSectionWithDataContainer($dataContainer);
+        $section = $this->object->retrieveSectionFromDataContainer($dataContainer);
         $this->assertInstanceOf('NpDocument\Model\Section\SectionClass\Section', $section);
     }
 }
