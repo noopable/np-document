@@ -9,6 +9,7 @@ use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use NpDocument\Exception\RuntimeException;
 use NpDocument\Exception\DomainException;
 use NpDocument\Model\Section\Config;
+use NpDocument\Model\Section\SectionInterface;
 use NpDocument\Model\Section\SectionPluginManager;
 
 class Section extends AbstractDbTableRepository
@@ -71,8 +72,24 @@ class Section extends AbstractDbTableRepository
 
         return $this->getSectionPluginManager()->get($type, $config);
     }
+    
+    public function saveSection(SectionInterface $section)
+    {
+        $dataContainer = $section->getDataContainer();
+        return $this->save($dataContainer);
+    }
+    
+    public function findSection($globalSectionId)
+    {
+        $dataContainer = $this->getEntity(array('global_section_id' => $globalSectionId));
+        if ($dataContainer instanceof AbstractEntity) {
+            return $this->retrieveSectionFromDataContainer($dataContainer);
+        } else {
+            return null;
+        }
+    }
 
-    public function createSectionWithDataContainer(AbstractEntity $dataContainer)
+    public function retrieveSectionFromDataContainer(AbstractEntity $dataContainer)
     {
         if (!isset($dataContainer->section_class)) {
             throw new DomainException('column section_class should be valid class shortname');
