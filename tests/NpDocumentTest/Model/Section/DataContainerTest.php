@@ -10,6 +10,12 @@ class DataContainerTest extends \PHPUnit_Framework_TestCase
      * @var DataContainer
      */
     protected $object;
+    
+    /**
+     *
+     * @var \ReflectionObject
+     */
+    protected $ref;
 
     /**
      * Sets up the fixture, for example, opens a network connection.
@@ -18,6 +24,7 @@ class DataContainerTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->object = new DataContainer;
+        $this->ref = new \ReflectionObject($this->object);
     }
 
     /**
@@ -30,26 +37,25 @@ class DataContainerTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers NpDocument\Model\Section\DataContainer::setIdentifier
-     * @todo   Implement testSetIdentifier().
      */
     public function testSetIdentifier()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        $expected = array('foo', 'bar');
+        $this->object->setIdentifier($expected);
+        $prop = $this->ref->getProperty('identifier');
+        $prop->setAccessible(true);
+        $this->assertEquals($expected, $prop->getValue($this->object));
     }
 
     /**
+     * @depends testSetIdentifier
      * @covers NpDocument\Model\Section\DataContainer::getIdentifier
-     * @todo   Implement testGetIdentifier().
      */
     public function testGetIdentifier()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        $expected = array('foo');
+        $this->object->setIdentifier($expected);
+        $this->assertEquals($expected, $this->object->getIdentifier());
     }
 
     /**
@@ -67,26 +73,295 @@ class DataContainerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers NpDocument\Model\Section\DataContainer::setOriginate
-     * @todo   Implement testSetOriginate().
+     * @covers NpDocument\Model\Section\DataContainer::setXmlConfigReader
      */
-    public function testSetOriginate()
+    public function testSetXmlConfigReader()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+        $reader = new \Zend\Config\Reader\Xml;
+        $this->object->setXmlConfigReader($reader);
+        $prop = $this->ref->getProperty('xmlConfigReader');
+        $prop->setAccessible(true);
+        $this->assertSame($reader, $prop->getValue($this->object));
+    }
+
+    /**
+     * @covers NpDocument\Model\Section\DataContainer::getXmlConfigReader
+     */
+    public function testGetXmlConfigReader()
+    {
+        $this->assertInstanceOf('Zend\Config\Reader\Xml', $this->object->getXmlConfigReader());
+    }
+
+    /**
+     * @covers NpDocument\Model\Section\DataContainer::setXmlConfigWriter
+     */
+    public function testSetXmlConfigWriter()
+    {
+        $writer = new \Zend\Config\Writer\Xml;
+        $this->object->setXmlConfigWriter($writer);
+        $prop = $this->ref->getProperty('xmlConfigWriter');
+        $prop->setAccessible(true);
+        $this->assertSame($writer, $prop->getValue($this->object));
+    }
+
+    /**
+     * @covers NpDocument\Model\Section\DataContainer::getXmlConfigWriter
+     */
+    public function testGetXmlConfigWriter()
+    {
+        $this->assertInstanceOf('Zend\Config\Writer\Xml', $this->object->getXmlConfigWriter());
+    }
+
+    /**
+     * @covers NpDocument\Model\Section\DataContainer::setProperty
+     */
+    public function testSetProperty()
+    {
+        $this->object->setProperty('foo', 'bar');
+        $prop = $this->ref->getProperty('properties');
+        $prop->setAccessible(true);
+        $this->assertEquals('bar', $prop->getValue($this->object)['foo']);
+    }
+
+    /**
+     * @depends testSetProperty
+     * @covers NpDocument\Model\Section\DataContainer::getProperty
+     */
+    public function testGetProperty()
+    {
+        $this->object->setProperty('foo', 'bar');
+        $this->assertEquals('bar', $this->object->getProperty('foo'));
+    }
+
+    /**
+     * @depends testGetProperty
+     * @covers NpDocument\Model\Section\DataContainer::issetProperty
+     */
+    public function testIssetProperty()
+    {
+        $this->assertFalse($this->object->issetProperty('foo'));
+        $this->object->setProperty('foo', 'bar');
+        $this->assertTrue($this->object->issetProperty('foo'));
+    }
+
+    /**
+     * @depends testIssetProperty
+     * @covers NpDocument\Model\Section\DataContainer::setSectionProperties
+     */
+    public function testSetSectionProperties()
+    {
+        $xmlString = '<?xml version="1.0" encoding="UTF-8"?><zend-config><foo>bar</foo></zend-config>';
+        $this->object->setSectionProperties($xmlString);
+        $this->assertTrue($this->object->issetProperty('foo'));
+        $this->assertEquals('bar', $this->object->getProperty('foo'));
+    }
+
+    /**
+     * @depends testSetSectionProperties
+     * @covers NpDocument\Model\Section\DataContainer::getSectionProperties
+     */
+    public function testGetSectionProperties()
+    {
+        $xmlString1 = '<?xml version="1.0" encoding="UTF-8"?><zend-config/>';
+        $res1 = $this->object->getSectionProperties();
+        $this->assertXmlStringEqualsXmlString($xmlString1, $res1);
+        
+        $xmlString2 = '<?xml version="1.0" encoding="UTF-8"?><zend-config><foo>bar</foo></zend-config>';
+        $this->object->setSectionProperties($xmlString2);
+        $res2 = $this->object->getSectionProperties();
+        $this->assertXmlStringEqualsXmlString($xmlString2, $res2);
+    }
+    
+    /**
+     * @covers NpDocument\Model\Section\DataContainer::setStatusFlag
+     */
+    public function testSetStatusFlag()
+    {
+        $this->object->setStatusFlag('foo', true);
+        $prop = $this->ref->getProperty('status');
+        $prop->setAccessible(true);
+        $status = $prop->getValue($this->object);
+        $this->assertTrue(isset($status['foo']));
+    }
+    
+    /**
+     * @covers NpDocument\Model\Section\DataContainer::getStatusFlag
+     */
+    public function testGetStatusFlag()
+    {
+        $this->assertFalse($this->object->getStatusFlag('foo'));
+        $this->object->setStatusFlag('foo', true);
+        $this->assertTrue($this->object->getStatusFlag('foo'));
+    }
+
+    /**
+     * @depends testGetStatusFlag
+     * @covers NpDocument\Model\Section\DataContainer::setStatus
+     */
+    public function testSetStatus()
+    {
+        $commaSeparated = 'foo,bar,baz';
+        $this->object->setStatus($commaSeparated);
+        $this->assertTrue($this->object->getStatusFlag('foo'));
+        $this->assertTrue($this->object->getStatusFlag('bar'));
+        $this->assertTrue($this->object->getStatusFlag('baz'));
+    }
+
+    /**
+     * @depends testSetStatus
+     */
+    public function testGetStatus()
+    {
+        $commaSeparated = 'foo,bar,baz';
+        $this->object->setStatus($commaSeparated);
+        $this->assertEquals($commaSeparated, $this->object->getStatus());
+    }
+
+    /**
+     * @covers NpDocument\Model\Section\DataContainer::setPriority
+     */
+    public function testSetPriority()
+    {
+        $commaSeparated = 'content,medium,5';
+        $expected = array(
+            'content' => 'content',
+            'medium' => 'medium',
+            5 => 5,
         );
+        $this->object->setPriority($commaSeparated);
+        $prop = $this->ref->getProperty('priority');
+        $prop->setAccessible(true);
+        $this->assertEquals($expected, $prop->getValue($this->object));
+    }
+
+    /**
+     * @depends testSetPriority
+     * @covers NpDocument\Model\Section\DataContainer::getPriority
+     */
+    public function testGetPriority()
+    {
+        $commaSeparated = 'content,medium,5';
+        $this->object->setPriority($commaSeparated);
+        $this->assertEquals($commaSeparated, $this->object->getPriority());
+    }
+    
+    /**
+     * @covers NpDocument\Model\Section\DataContainer::convertSetToInt
+     */
+    public function testConvertSetToInt()
+    {
+        $set = array('a', 'b', 'c', 'd', 'e');
+        $target = array('a', 'd');
+        $res = $this->object->convertSetToInt($set, $target);
+        $this->assertEquals(9, $res);
+    }
+    
+    /**
+     * @depends testConvertSetToInt
+     * @covers NpDocument\Model\Section\DataContainer::getPriorityInt
+     */
+    public function testGetPriorityInt()
+    {
+        $prop = $this->ref->getProperty('priorityStrings');
+        $prop->setAccessible(true);
+        $prioritySet = $prop->getValue($this->object);
+        $commaSeparated = 'content,medium,5';
+        $priority = array('content', 'medium','5');
+        $expected = $this->object->convertSetToInt($prioritySet, $priority);
+        $this->object->setPriority($commaSeparated);
+        $res = $this->object->getPriorityInt();
+        $this->assertEquals($expected, $res);
+    }
+
+    /**
+     * @covers NpDocument\Model\Section\DataContainer::setBranchSet
+     * @todo   getArrayCopyしたときのbranch_setのデータと矛盾していないかのチェックが必要
+     */
+    public function testSetBranchSet()
+    {
+        $commaSeparated = '1,2,3';
+        $this->object->setBranchSet($commaSeparated);
+        $prop = $this->ref->getProperty('branchSet');
+        $prop->setAccessible(true);
+        $branchSet = $prop->getValue($this->object);
+        $this->assertContains(1, $branchSet);
+        $this->assertContains(2, $branchSet);
+        $this->assertContains(3, $branchSet);
+        $this->assertEquals(3, $branchSet[3]);
+    }
+
+    /**
+     * @covers NpDocument\Model\Section\DataContainer::getBranchSet
+     */
+    public function testGetBranchSet()
+    {
+        $commaSeparated = '1,2,3';
+        $this->object->setBranchSet($commaSeparated);
+        $this->assertEquals($commaSeparated, $this->object->getBranchSet());
+    }
+
+    /**
+     * @covers NpDocument\Model\Section\DataContainer::setOriginate
+     */
+    public function testOriginate()
+    {
+        $domainId = 3455663;
+        $documentId = 334523;
+        $sectionName = 'content';
+        $sectionRev = 523;
+        $this->object->originate($domainId, $documentId, $sectionName, $sectionRev);
+        $this->assertEquals('34BAAF-051ABB-content.523', $this->object->global_section_id);
+        
+        //Revision Up
+        $this->object->originate(++$domainId, ++$documentId, $sectionName, ++$sectionRev, true);
+        $this->assertEquals('34BAB0-051ABC-content.524', $this->object->global_section_id);
+    }
+    
+    /**
+     * @expectedException NpDocument\Exception\DomainException
+     */
+    public function testOriginateOverwriteWithoutForce()
+    {
+        $domainId = 3455663;
+        $documentId = 334523;
+        $sectionName = 'content';
+        $sectionRev = 523;
+        $this->object->originate($domainId, $documentId, $sectionName, $sectionRev);
+        $this->object->originate(++$domainId, ++$documentId, $sectionName, ++$sectionRev);
     }
 
     /**
      * @covers NpDocument\Model\Section\DataContainer::offsetSet
-     * @todo   Implement testOffsetSet().
      */
     public function testOffsetSet()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        $this->object->offsetSet('content', 'foo');
+        $this->assertEquals('foo', $this->object->content);
+    }
+    
+    /**
+     * @expectedException NpDocument\Exception\DomainException
+     */
+    public function testOffsetSetUnknownColumn()
+    {
+        $this->object->offsetSet('foo', 'bar');
+    }
+    
+    /**
+     * @expectedException NpDocument\Exception\DomainException
+     */
+    public function testOffsetSetImmutableColumn()
+    {
+        $this->object->offsetSet('domain_id', '345');
+        $this->object->offsetSet('domain_id', '346');
+    }
+
+    /**
+     * @covers NpDocument\Model\Section\DataContainer::offsetGet
+     */
+    public function testOffsetGet()
+    {
+        $this->object->offsetSet('content', 'foo');
+        $this->assertEquals('foo', $this->object->offsetGet('content'));
     }
 }
