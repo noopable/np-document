@@ -10,7 +10,7 @@ namespace NpDocument\Model\Section;
 
 use Flower\Model\AbstractEntity;
 use NpDocument\Exception\DomainException;
-use NpDocument\Model\Document\Document;
+use NpDocument\Model\Document\DocumentClass\Document;
 use Zend\Config\Exception\RuntimeException as ConfigRuntimeException;
 use Zend\Config\Writer\Xml as ConfigWriter; 
 use Zend\Config\Reader\Xml as ConfigReader;

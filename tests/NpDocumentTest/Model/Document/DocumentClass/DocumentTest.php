@@ -1,7 +1,7 @@
 <?php
 namespace NpDocumentTest\Model\Document;
 
-use NpDocument\Model\Document\Document;
+use NpDocument\Model\Document\DocumentClass\Document;
 use NpDocument\Model\Document\DocumentInterface;
 
 /**
@@ -32,19 +32,15 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers NpDocument\Model\Document\Document::getIdentifier
-     * @todo   Implement testGetIdentifier().
+     * @covers NpDocument\Model\Document\DocumentClass\Document::getIdentifier
      */
     public function testGetIdentifier()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        $this->assertEquals(array('domain_id', 'document_id'), $this->object->getIdentifier());
     }
 
     /**
-     * @covers NpDocument\Model\Document\Document::generateGlobalDocumentId
+     * @covers NpDocument\Model\Document\DocumentClass\Document::generateGlobalDocumentId
      */
     public function testGenerateGlobalDocumentId()
     {
@@ -74,7 +70,7 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers NpDocument\Model\Document\Document::getSections
+     * @covers NpDocument\Model\Document\DocumentClass\Document::getSections
      * @todo   Implement testGetSections().
      */
     public function testGetSections()

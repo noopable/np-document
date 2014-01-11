@@ -16,7 +16,7 @@ return array(
             'adapter' => 'dbAdapter',
         ),
     ),
-    'NpDocument\Model\Document\Document' => array(
+    'NpDocument\Model\Document\DocumentClass\Document' => array(
         'parameters' => array(
             'array' => array(),
         ),
@@ -24,7 +24,7 @@ return array(
     'NpDocument\Model\Repository\Document' => array(
         'parameters' => array(
             'name' => 'document',
-            'entityPrototype' => 'NpDocument\Model\Document\Document',
+            'entityPrototype' => 'NpDocument\Model\Document\DocumentClass\Document',
             'tableGateway' => 'DocumentTable',
         ),
         'injections' => array(

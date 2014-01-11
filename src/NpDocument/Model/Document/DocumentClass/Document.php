@@ -1,8 +1,9 @@
 <?php
-namespace NpDocument\Model\Document;
+namespace NpDocument\Model\Document\DocumentClass;
 
 use Flower\Model\AbstractEntity;
 use NpDocument\Exception\DomainException;
+use NpDocument\Model\Document\DocumentInterface;
 
 class Document extends AbstractEntity implements DocumentInterface
 {

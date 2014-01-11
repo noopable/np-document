@@ -309,7 +309,6 @@ class StandardManagerTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers NpDocument\Resource\Manager\StandardManager::addStrategy
-     * @todo   Implement testAddStrategy().
      */
     public function testAddStrategy()
     {
