@@ -48,6 +48,7 @@ CREATE TABLE `document` (
 
 LOCK TABLES `document` WRITE;
 /*!40000 ALTER TABLE `document` DISABLE KEYS */;
+INSERT INTO `document` VALUES ('',1,1,NULL,NULL,'1','5,medium,content','document',NULL,'2014-01-11 20:31:31'),('foo',1,2,NULL,NULL,'1','5,medium,content','document',NULL,'2014-01-11 21:22:45');
 /*!40000 ALTER TABLE `document` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -61,7 +62,7 @@ DROP TABLE IF EXISTS `domain`;
 CREATE TABLE `domain` (
   `domain_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`domain_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -70,6 +71,7 @@ CREATE TABLE `domain` (
 
 LOCK TABLES `domain` WRITE;
 /*!40000 ALTER TABLE `domain` DISABLE KEYS */;
+INSERT INTO `domain` VALUES (1),(2);
 /*!40000 ALTER TABLE `domain` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -85,7 +87,7 @@ CREATE TABLE `sandbox` (
   `fullname` char(200) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fullName` (`fullname`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -110,7 +112,7 @@ CREATE TABLE `section` (
   `global_document_id` varchar(255) DEFAULT NULL,
   `domain_id` int(10) unsigned NOT NULL,
   `document_id` mediumint(8) unsigned NOT NULL,
-  `section_class` varchar(32) NOT NULL,
+  `section_class` varchar(32) NOT NULL DEFAULT 'Section',
   `section_name` varchar(32) NOT NULL,
   `section_rev` smallint(4) unsigned DEFAULT '1',
   `branch_set` set('64','63','62','61','60','59','58','57','56','55','54','53','52','51','50','49','48','47','46','45','44','43','42','41','40','39','38','37','36','35','34','33','32','31','30','29','28','27','26','25','24','23','22','21','20','19','18','17','16','15','14','13','12','11','10','9','8','7','6','5','4','3','2','1') DEFAULT NULL,
@@ -129,8 +131,8 @@ CREATE TABLE `section` (
   `section_to_string` text,
   `section_note` text,
   PRIMARY KEY (`global_section_id`),
-  UNIQUE KEY `domain_document` (`domain_id`,`document_id`),
   UNIQUE KEY `domain_document_section` (`domain_id`,`document_id`,`section_name`,`section_rev`),
+  KEY `domain_document` (`domain_id`,`document_id`),
   KEY `document_branch` (`global_document_id`,`branch_set`,`priority`),
   KEY `document_release` (`release_tag`,`global_document_id`),
   KEY `document_domain_release` (`domain_id`,`release_tag`,`global_document_id`),
@@ -149,6 +151,30 @@ LOCK TABLES `section` WRITE;
 /*!40000 ALTER TABLE `section` DISABLE KEYS */;
 /*!40000 ALTER TABLE `section` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = cp932 */ ;
+/*!50003 SET character_set_results = cp932 */ ;
+/*!50003 SET collation_connection  = cp932_japanese_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`admin`@`localhost`*/ /*!50003 TRIGGER section_before_insert BEFORE INSERT ON section
+FOR EACH ROW BEGIN
+SET NEW.section_rev = (SELECT ifnull(MAX(section_rev),0)+1 FROM section WHERE domain_id = NEW.domain_id and document_id = NEW.document_id and section_name = NEW.section_name);
+IF NEW.global_document_id is null THEN
+  SET NEW.global_document_id = (SELECT global_document_id FROM document WHERE domain_id = NEW.domain_id and document_id = NEW.document_id);
+END IF;
+IF NEW.global_section_id = '' THEN
+SET NEW.global_section_id = (select concat(ifnull(NEW.global_document_id,'notset'), '-', ifnull(NEW.section_name,'notset'), '.', NEW.section_rev)); 
+END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -159,4 +185,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-01-08 16:28:42
+-- Dump completed on 2014-01-12  8:32:12
