@@ -4,7 +4,7 @@ return array(
         //リソースfactoryでブリッジ指定したサービスは、Aliasを張ることでDIで使用可能になる。
         //このalias指定がないと、パラメーターとして指定したときインスタンスと解釈してくれない。
         'dbAdapter' => 'Zend\Db\Adapter\Adapter',
-        'DocumentTable' =>   'Zend\Db\TableGateway\TableGateway',
+        'DocumentTable' =>   'NpDocument\Model\Document\DocumentTableGateway',
         'SectionTable' => 'Zend\Db\TableGateway\TableGateway',
         'SandboxTable' =>   'Zend\Db\TableGateway\TableGateway',
     ),
