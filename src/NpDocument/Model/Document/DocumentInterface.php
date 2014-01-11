@@ -14,4 +14,5 @@ namespace NpDocument\Model\Document;
  * @author tomoaki
  */
 interface DocumentInterface {
+    const GLOBAL_DOCUMENT_DELIMITER = '-';
 }

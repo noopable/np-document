@@ -15,6 +15,7 @@ use Flower\Model\AbstractEntity;
  * @author tomoaki
  */
 interface SectionInterface {
+    const SECTION_REV_DELIMITER = '.';
     public function __construct(Config $config = null);
     public function setDataContainer(AbstractEntity $dataContainer);
     public function getDataContainer();
