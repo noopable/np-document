@@ -1,5 +1,5 @@
 <?php
-namespace NpDocument\Service;
+namespace NpDocumentTest\Service;
 
 use Zend\ServiceManager\ServiceManager;
 use NpDocument\Service\RepositoryServiceFactory;
