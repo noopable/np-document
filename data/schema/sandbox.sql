@@ -48,6 +48,7 @@ CREATE TABLE `document` (
 
 LOCK TABLES `document` WRITE;
 /*!40000 ALTER TABLE `document` DISABLE KEYS */;
+INSERT INTO `document` VALUES ('000001-000004',1,4,NULL,NULL,'1','5,medium,content','document',NULL,'2014-01-12 00:10:52'),('000001-000005',1,5,NULL,NULL,'1','5,medium,content','document',NULL,'2014-01-12 00:13:32'),('000001-000006',1,6,NULL,NULL,'1','5,medium,content','document',NULL,'2014-01-12 00:25:46'),('000001-000007',1,7,NULL,NULL,'1','5,medium,content','document',NULL,'2014-01-12 00:26:35'),('000001-000009',1,9,NULL,NULL,'1','5,medium,content','document',NULL,'2014-01-12 00:27:33'),('000002-000001',2,1,NULL,NULL,'1','5,medium,content','document',NULL,'2014-01-12 02:31:15');
 /*!40000 ALTER TABLE `document` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -61,12 +62,23 @@ UNLOCK TABLES;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`admin`@`localhost`*/ /*!50003 TRIGGER document_before_insert BEFORE INSERT ON document
 FOR EACH ROW BEGIN
-if NEW.document_id = 0 THEN
-  SET NEW.document_id = (SELECT ifnull(MAX(document_id),0)+1 FROM document WHERE domain_id = NEW.domain_id);
-END IF;
-IF NEW.global_document_id = '' THEN
-  SET NEW.global_document_id = (select concat(LPAD(HEX(NEW.domain_id), 6, '0'), '-', LPAD(HEX(NEW.document_id), 6, '0')));
-END IF;
+    if NEW.document_id = 0 THEN
+      SET NEW.document_id = 
+        (
+            SELECT ifnull(MAX(document_id),0)+1 
+            FROM document WHERE domain_id = NEW.domain_id
+        );
+    END IF;
+    IF NEW.global_document_id = '' THEN
+      SET NEW.global_document_id = 
+        (
+            SELECT CONCAT(
+                LPAD(HEX(NEW.domain_id), 6, '0'),
+                '-', 
+                LPAD(HEX(NEW.document_id), 6, '0')
+            )
+        );
+    END IF;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -84,7 +96,7 @@ DROP TABLE IF EXISTS `domain`;
 CREATE TABLE `domain` (
   `domain_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`domain_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -93,7 +105,7 @@ CREATE TABLE `domain` (
 
 LOCK TABLES `domain` WRITE;
 /*!40000 ALTER TABLE `domain` DISABLE KEYS */;
-INSERT INTO `domain` VALUES (1);
+INSERT INTO `domain` VALUES (1),(2);
 /*!40000 ALTER TABLE `domain` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -171,6 +183,7 @@ CREATE TABLE `section` (
 
 LOCK TABLES `section` WRITE;
 /*!40000 ALTER TABLE `section` DISABLE KEYS */;
+INSERT INTO `section` VALUES ('000001-000004-main.1','000001-000004',1,4,'Section','main',1,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,'5,medium,content','2014-01-12 02:21:55',NULL,NULL,NULL);
 /*!40000 ALTER TABLE `section` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -184,13 +197,29 @@ UNLOCK TABLES;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`admin`@`localhost`*/ /*!50003 TRIGGER section_before_insert BEFORE INSERT ON section
 FOR EACH ROW BEGIN
-SET NEW.section_rev = (SELECT ifnull(MAX(section_rev),0)+1 FROM section WHERE domain_id = NEW.domain_id and document_id = NEW.document_id and section_name = NEW.section_name);
-IF NEW.global_document_id is null THEN
-  SET NEW.global_document_id = (SELECT global_document_id FROM document WHERE domain_id = NEW.domain_id and document_id = NEW.document_id);
-END IF;
-IF NEW.global_section_id = '' THEN
-SET NEW.global_section_id = (select concat(ifnull(NEW.global_document_id,'notset'), '-', ifnull(NEW.section_name,'notset'), '.', NEW.section_rev)); 
-END IF;
+    SET NEW.section_rev = 
+        (
+        SELECT ifnull(MAX(section_rev),0)+1 FROM section 
+        WHERE domain_id = NEW.domain_id AND document_id = NEW.document_id 
+        AND section_name = NEW.section_name
+        );
+    IF NEW.global_document_id is null THEN
+      SET NEW.global_document_id = 
+        (
+        SELECT global_document_id FROM document 
+        WHERE domain_id = NEW.domain_id and document_id = NEW.document_id
+        );
+    END IF;
+    IF NEW.global_section_id = '' THEN
+        SET NEW.global_section_id = 
+        (
+        SELECT CONCAT(NEW.global_document_id,
+            '-', 
+            ifnull(NEW.section_name,'notset'),
+            '.',
+            NEW.section_rev)
+        ); 
+    END IF;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -207,4 +236,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-01-12  9:29:25
+-- Dump completed on 2014-01-12 11:31:51
