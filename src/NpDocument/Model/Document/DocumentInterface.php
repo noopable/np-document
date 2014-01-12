@@ -14,5 +14,8 @@ namespace NpDocument\Model\Document;
  * @author tomoaki
  */
 interface DocumentInterface {
+    /**
+     * @see data/resource/document_before_insert.trigger
+     */
     const GLOBAL_DOCUMENT_DELIMITER = '-';
 }

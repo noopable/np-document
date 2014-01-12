@@ -20,6 +20,8 @@ class Document extends AbstractEntity implements DocumentInterface
      * @todo use Validator with DI
      * @todo remove static method from standard class, use abstract or another
      * 
+     * @see data/resource/document_before_insert.trigger
+     * 
      * @param integer $domainId
      * @param integer $documentId
      */

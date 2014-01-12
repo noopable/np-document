@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS `document`;
 CREATE TABLE `document` (
   `global_document_id` varchar(13) NOT NULL DEFAULT '',
   `domain_id` int(10) unsigned NOT NULL,
-  `document_id` mediumint(8) unsigned NOT NULL,
+  `document_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `document_class` varchar(32) DEFAULT NULL,
   `document_name` varchar(32) DEFAULT NULL,
   `branch` varchar(2) DEFAULT '1',
@@ -48,9 +48,31 @@ CREATE TABLE `document` (
 
 LOCK TABLES `document` WRITE;
 /*!40000 ALTER TABLE `document` DISABLE KEYS */;
-INSERT INTO `document` VALUES ('',1,1,NULL,NULL,'1','5,medium,content','document',NULL,'2014-01-11 20:31:31'),('foo',1,2,NULL,NULL,'1','5,medium,content','document',NULL,'2014-01-11 21:22:45');
 /*!40000 ALTER TABLE `document` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = cp932 */ ;
+/*!50003 SET character_set_results = cp932 */ ;
+/*!50003 SET collation_connection  = cp932_japanese_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`admin`@`localhost`*/ /*!50003 TRIGGER document_before_insert BEFORE INSERT ON document
+FOR EACH ROW BEGIN
+if NEW.document_id = 0 THEN
+  SET NEW.document_id = (SELECT ifnull(MAX(document_id),0)+1 FROM document WHERE domain_id = NEW.domain_id);
+END IF;
+IF NEW.global_document_id = '' THEN
+  SET NEW.global_document_id = (select concat(LPAD(HEX(NEW.domain_id), 6, '0'), '-', LPAD(HEX(NEW.document_id), 6, '0')));
+END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `domain`
@@ -71,7 +93,7 @@ CREATE TABLE `domain` (
 
 LOCK TABLES `domain` WRITE;
 /*!40000 ALTER TABLE `domain` DISABLE KEYS */;
-INSERT INTO `domain` VALUES (1),(2);
+INSERT INTO `domain` VALUES (1);
 /*!40000 ALTER TABLE `domain` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -185,4 +207,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-01-12  8:32:12
+-- Dump completed on 2014-01-12  9:29:25
