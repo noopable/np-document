@@ -28,6 +28,7 @@ CREATE TABLE `document` (
   `document_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `document_class` varchar(32) DEFAULT NULL,
   `document_name` varchar(32) DEFAULT NULL,
+  `branch_set` set('64','63','62','61','60','59','58','57','56','55','54','53','52','51','50','49','48','47','46','45','44','43','42','41','40','39','38','37','36','35','34','33','32','31','30','29','28','27','26','25','24','23','22','21','20','19','18','17','16','15','14','13','12','11','10','9','8','7','6','5','4','3','2','1') DEFAULT '1',
   `branch` varchar(2) DEFAULT '1',
   `priority` set('9','8','7','6','5','4','3','2','1','low','medium-low','medium','medium-hight','high','hidden_bottom','fixed_bottom','footer','content_post','content','content_pre','header','fixed_top','hidden_top') DEFAULT '5,medium,content',
   `acl_resource_id` varchar(32) DEFAULT 'document',
@@ -48,7 +49,7 @@ CREATE TABLE `document` (
 
 LOCK TABLES `document` WRITE;
 /*!40000 ALTER TABLE `document` DISABLE KEYS */;
-INSERT INTO `document` VALUES ('000001-000004',1,4,NULL,NULL,'1','5,medium,content','document',NULL,'2014-01-12 00:10:52'),('000001-000005',1,5,NULL,NULL,'1','5,medium,content','document',NULL,'2014-01-12 00:13:32'),('000001-000006',1,6,NULL,NULL,'1','5,medium,content','document',NULL,'2014-01-12 00:25:46'),('000001-000007',1,7,NULL,NULL,'1','5,medium,content','document',NULL,'2014-01-12 00:26:35'),('000001-000009',1,9,NULL,NULL,'1','5,medium,content','document',NULL,'2014-01-12 00:27:33'),('000002-000001',2,1,NULL,NULL,'1','5,medium,content','document',NULL,'2014-01-12 02:31:15');
+INSERT INTO `document` VALUES ('000001-000004',1,4,NULL,NULL,'1','1','5,medium,content','document',NULL,'2014-01-12 00:10:52'),('000001-000005',1,5,NULL,NULL,'1','1','5,medium,content','document',NULL,'2014-01-12 00:13:32'),('000001-000006',1,6,NULL,NULL,'1','1','5,medium,content','document',NULL,'2014-01-12 00:25:46'),('000001-000007',1,7,NULL,NULL,'1','1','5,medium,content','document',NULL,'2014-01-12 00:26:35'),('000001-000009',1,9,NULL,NULL,'1','1','5,medium,content','document',NULL,'2014-01-12 00:27:33'),('000002-000001',2,1,NULL,NULL,'1','1','5,medium,content','document',NULL,'2014-01-12 02:31:15'),('000002-000002',2,2,NULL,NULL,'1','1','5,medium,content','document',NULL,'2014-01-12 04:56:56');
 /*!40000 ALTER TABLE `document` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -62,12 +63,15 @@ UNLOCK TABLES;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`admin`@`localhost`*/ /*!50003 TRIGGER document_before_insert BEFORE INSERT ON document
 FOR EACH ROW BEGIN
+    SET @document_id = NULL;
+    SET @global_document_id = NULL;
     if NEW.document_id = 0 THEN
       SET NEW.document_id = 
         (
             SELECT ifnull(MAX(document_id),0)+1 
             FROM document WHERE domain_id = NEW.domain_id
         );
+    SET @document_id = NEW.document_id;
     END IF;
     IF NEW.global_document_id = '' THEN
       SET NEW.global_document_id = 
@@ -78,6 +82,7 @@ FOR EACH ROW BEGIN
                 LPAD(HEX(NEW.document_id), 6, '0')
             )
         );
+      SET @global_document_id = NEW.global_document_id;
     END IF;
 END */;;
 DELIMITER ;
@@ -183,7 +188,7 @@ CREATE TABLE `section` (
 
 LOCK TABLES `section` WRITE;
 /*!40000 ALTER TABLE `section` DISABLE KEYS */;
-INSERT INTO `section` VALUES ('000001-000004-main.1','000001-000004',1,4,'Section','main',1,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,'5,medium,content','2014-01-12 02:21:55',NULL,NULL,NULL);
+INSERT INTO `section` VALUES ('000001-000004-main.1','000001-000004',1,4,'Section','main',1,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,'5,medium,content','2014-01-12 02:21:55',NULL,NULL,NULL),('000001-000007-a.1','000001-000007',1,7,'Section','a',1,NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,NULL,'5,medium,content','2014-01-12 05:02:57',NULL,NULL,NULL);
 /*!40000 ALTER TABLE `section` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -197,12 +202,16 @@ UNLOCK TABLES;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`admin`@`localhost`*/ /*!50003 TRIGGER section_before_insert BEFORE INSERT ON section
 FOR EACH ROW BEGIN
+    SET @section_rev = NULL;
+    SET @global_document_id = NULL;
+    SET @global_section_id = NULL;
     SET NEW.section_rev = 
         (
         SELECT ifnull(MAX(section_rev),0)+1 FROM section 
         WHERE domain_id = NEW.domain_id AND document_id = NEW.document_id 
         AND section_name = NEW.section_name
         );
+    SET @section_rev = NEW.section_rev;
     IF NEW.global_document_id is null THEN
       SET NEW.global_document_id = 
         (
@@ -210,6 +219,7 @@ FOR EACH ROW BEGIN
         WHERE domain_id = NEW.domain_id and document_id = NEW.document_id
         );
     END IF;
+    SET @global_document_id = NEW.global_document_id;
     IF NEW.global_section_id = '' THEN
         SET NEW.global_section_id = 
         (
@@ -220,6 +230,7 @@ FOR EACH ROW BEGIN
             NEW.section_rev)
         ); 
     END IF;
+    SET @global_section_id = NEW.global_section_id;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -236,4 +247,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-01-12 11:31:51
+-- Dump completed on 2014-01-18  4:50:56
