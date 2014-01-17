@@ -1,7 +1,7 @@
 <?php
 namespace NpDocument\Model\Document\DocumentClass;
 
-use NpDocument\Exception\DomainException;
+use NpDocument\Model\Document\AbstractDocument;
 
 class Document extends AbstractDocument
 {

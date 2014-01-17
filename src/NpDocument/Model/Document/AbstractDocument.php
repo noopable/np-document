@@ -1,5 +1,5 @@
 <?php
-namespace NpDocument\Model\Document\DocumentClass;
+namespace NpDocument\Model\Document;
 
 use Flower\Model\AbstractEntity;
 use NpDocument\Exception\DomainException;
