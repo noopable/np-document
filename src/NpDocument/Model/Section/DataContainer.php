@@ -10,7 +10,8 @@ namespace NpDocument\Model\Section;
 
 use Flower\Model\AbstractEntity;
 use NpDocument\Exception\DomainException;
-use NpDocument\Model\Document\DocumentClass\Document;
+use NpDocument\Model\Document\DocumentClass\AbstractDocument;
+use NpDocument\Model\Document\DocumentInterface;
 use Zend\Config\Exception\RuntimeException as ConfigRuntimeException;
 use Zend\Config\Writer\Xml as ConfigWriter; 
 use Zend\Config\Reader\Xml as ConfigReader;
@@ -98,7 +99,7 @@ class DataContainer extends AbstractEntity
      */
     public static function generateGlobalSectionId($domainId, $documentId, $sectionName, $sectionRev)
     {
-        $globalDocumentId = Document::generateGlobalDocumentId($domainId, $documentId);
+        $globalDocumentId = AbstractDocument::generateGlobalDocumentId($domainId, $documentId);
         
         /**
          * @todo use Validator with DI
@@ -122,7 +123,7 @@ class DataContainer extends AbstractEntity
                 throw new DomainException('rev is too large');
         }
         
-        return sprintf($globalDocumentId . Document::GLOBAL_DOCUMENT_DELIMITER . 
+        return sprintf($globalDocumentId . DocumentInterface::GLOBAL_DOCUMENT_DELIMITER . 
                 '%s' . SectionInterface::SECTION_REV_DELIMITER . '%u', $sectionName, $sectionRev);
         
     }
