@@ -8,12 +8,16 @@ use Zend\Db\TableGateway\TableGatewayInterface;
 use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use NpDocument\Exception\RuntimeException;
 use NpDocument\Exception\DomainException;
+use NpDocument\Model\Domain\DomainAwareInterface;
+use NpDocument\Model\Domain\DomainAwareTrait;
+use NpDocument\Model\Document\DocumentInterface;
 use NpDocument\Model\Section\Config;
 use NpDocument\Model\Section\SectionInterface;
 use NpDocument\Model\Section\SectionPluginManager;
 
-class Section extends AbstractDbTableRepository
+class Section extends AbstractDbTableRepository implements DomainAwareInterface
 {
+    use DomainAwareTrait;
 
     /**
      *
@@ -73,6 +77,21 @@ class Section extends AbstractDbTableRepository
         return $this->getSectionPluginManager()->get($type, $config);
     }
     
+    public function saveSections(array $sections, $transaction = true)
+    {
+        if ($transaction) {
+            //start transaction
+        }
+        foreach ($sections as $section) {
+            if ($section instanceof SectionInterface) {
+                $this->saveSection($section);
+            }
+        }
+        if ($transaction) {
+            //end transaction
+        }
+    }
+    
     public function saveSection(SectionInterface $section)
     {
         $dataContainer = $section->getDataContainer();
@@ -104,5 +123,25 @@ class Section extends AbstractDbTableRepository
         }
         
         return $section;
+    }
+    
+    /**
+     * 実装を簡易にするため、$whereはarrayに限定する
+     * @param \NpDocument\Model\Document\DocumentInterface $document
+     * @param array $where
+     */
+    public function retrieveSections(DocumentInterface $document, array $where = array())
+    {
+        $where['global_document_id'] = $document->getGlobalDocumentId();
+        
+        $sections = $this->getSectionRepository()->getCollection($where);
+        $document->setSections($sections);
+    }
+    
+    public function retrieveBranchSections(DocumentInterface $document)
+    {
+        $branch = $document->branch;
+        $globalDocumentId = $document->getGlobalDocumentId();
+        //@todo branch_setに対するwhereを作成して取得
     }
 }

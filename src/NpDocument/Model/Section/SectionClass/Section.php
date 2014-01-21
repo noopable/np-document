@@ -15,7 +15,6 @@ use NpDocument\Model\Section\SectionInterface;
 
 class Section implements SectionInterface
 {
-    protected $authenticated = false;
     
     /**
      *

@@ -21,7 +21,6 @@ use Zend\Config\Reader\Xml as ConfigReader;
  */
 class DataContainer extends AbstractEntity
 {
-    protected $authenticated = false;
     
     protected $identifier = array('domain_id', 'document_id', 'section_name', 'section_rev');
     

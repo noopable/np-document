@@ -1,14 +1,37 @@
 <?php
+/*
+ *
+ *
+ * @copyright Copyright (c) 2013-2014 KipsProduction (http://www.kips.gr.jp)
+ * @license   http://www.kips.gr.jp/newbsd/LICENSE.txt New BSD License
+ */
 namespace NpDocument\Model\Repository;
 
 use Flower\Model\AbstractDbTableRepository;
-use NpDocument\Exception\RuntimeException;
+use NpDocument\Exception\DomainException;
+use NpDocument\Model\Document\AbstractDocument;
+use NpDocument\Model\Document\DocumentInterface;
+use NpDocument\Model\Domain\DomainAwareInterface;
+use NpDocument\Model\Domain\DomainAwareTrait;
 use NpDocument\Model\Repository\Section as SectionRepository;
 use Zend\Db\TableGateway\TableGatewayInterface;
 
-class Document extends AbstractDbTableRepository
+/**
+ * @method mixed getSelect($clone = true)
+ * @method mixed getEntity($where = null)
+ * @method mixed getCollection($where = null, $limit = null)
+ * @method mixed create
+ * @method mixed save(AbstractEntity $entity, $forceInsert = false)
+ * @method mixed delete(AbstractEntity $entity)
+ * @method mixed setMappingMethods(array $methods)
+ * @method mixed setServiceLocator
+ * @method mixed getServiceLocator
+ * @method mixed setRepositoryPluginManager
+ * @method mixed getRepositoryPluginManager
+ */
+class Document extends AbstractDbTableRepository implements DomainAwareInterface
 {
-
+use DomainAwareTrait;
     /**
      *
      * @var TableGatewayInterface
@@ -25,21 +48,31 @@ class Document extends AbstractDbTableRepository
     protected $domainId;
 
 
-    public function setSectionTable(TableGatewayInterface $sectionTable)
+    public function getGlobalDocumentId($documentId)
     {
-        $this->sectionTable = $sectionTable;
+        $domainId = $this->getDomain()->getDomainId();
+        return AbstractDocument::generateGlobalDocumentId($domainId, $documentId);
     }
     
-    public function getSectionTable()
+    public function setDomainId($domainId = null)
     {
-        if (!isset($this->sectionTable)) {
-            if (isset($this->sectionRepository)) {
-                $this->sectionTable = $this->sectionRepository->getTableGateway();
-            } else {
-                throw new RuntimeException('Document repository needs section table or section repository');
+        if (null === $domainId) {
+            $domainId = $this->getDomain()->getDomainId();
+        } else {
+            if ($domainId !== $this->getDomain()->getDomainId()) {
+                throw new DomainException('cant\'t set domainId mismatched to injected domain');
             }
         }
-        return $this->sectionTable;
+        
+        $this->domainId = $domainId;
+    }
+    
+    public function getDomainId()
+    {
+        if (!isset($this->domainId)) {
+            $this->setDomainId();
+        }
+        return $this->domainId;
     }
     
     public function setSectionRepository(SectionRepository $sectionRepository)
@@ -52,8 +85,61 @@ class Document extends AbstractDbTableRepository
         return $this->sectionRepository;
     }
     
-    public function getDocument($where = null)
+    public function createDocument($params = null)
     {
+        
+    }
+    
+    public function getDocumentDigestCollection($where, $limit)
+    {
+        //Baseセクション、DigestセクションだけをJOINしたDocumentCollection
+    }
+    
+    public function getDocumentCollection ($where, $limit = null)
+    {
+        $where['domain_id'] = $this->getDomainId();
+    }
+    
+    public function getDocument($documentId)
+    {
+        //global化しなくても検索できるが。primary keyによる検索の方が速い。
+        //branchはcurrent　branchに限定する。
+        $globalDocumentId = $this->getGlobalDocumentId($documentId);
+        $entity = $this->getEntity(array('global_document_id' => $globalDocumentId));
+        $this->getSectionRepository()->retrieveBranchSections($entity);
+        return $entity;
+    }
+    
+    public function getDocumentBranch($documentId, $branchId)
+    {
+        
+    }
+    
+    public function getDocumentOwnedCurrentUser($documentId)
+    {
+        
+    }
+    
+    /**
+     * すべてのブランチ、すべてのセクションを含む
+     * @param type $globalDocumentId
+     */
+    public function getHoleDocument($documentId)
+    {
+        $globalDocumentId = $this->getGlobalDocumentId($documentId);
+        $entity = $this->getEntity(array('global_document_id' => $globalDocumentId));
+        $this->getSectionRepository()->retrieveSections($entity);
+        return $entity;
+    }
+    
+    public function findDocument($where = null)
+    {
+        //findでは、検索対象が問題になる。
+        //sectionを検索したい場合はsectionから先に検索するべき。
+        //ただし、ドキュメント検索はユーザー入力によるものではなく、
+        //アプリケーション要件で検索する。
+        //ユーザー入力による検索はLuceneで検索インデックスを構築するか
+        //Google Search等のカスタマイズを利用する。
         $select = $this->getSelect();
         if (null !== $where) {
             $select->where($where);
@@ -63,8 +149,14 @@ class Document extends AbstractDbTableRepository
         return $resultSet->current();
     }
     
-    public function setDomainId($domainId)
+    public function saveDocument(DocumentInterface $document)
     {
-        $this->domainId = $domainId;
+        $target = clone $document;
+        $sections = $target->getSections();
+        $target->setSections(array());
+        //transaction start
+        $this->save($target);
+        $this->getSectionRepository()->saveSections($sections, false);
+        //transaction end
     }
 }

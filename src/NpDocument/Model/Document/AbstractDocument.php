@@ -1,13 +1,25 @@
 <?php
+/*
+ *
+ *
+ * @copyright Copyright (c) 2013-2014 KipsProduction (http://www.kips.gr.jp)
+ * @license   http://www.kips.gr.jp/newbsd/LICENSE.txt New BSD License
+ */
 namespace NpDocument\Model\Document;
 
 use Flower\Model\AbstractEntity;
 use NpDocument\Exception\DomainException;
 use NpDocument\Model\Document\DocumentInterface;
 
+/**
+ * 
+ * 
+ */
 abstract class AbstractDocument extends AbstractEntity implements DocumentInterface
 {
 
+    protected $defaultSectionsDef;
+    
     protected $sections;
     
     public function getIdentifier()
@@ -15,6 +27,17 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
         return array('domain_id', 'document_id');
     }
     
+    public function getGlobalDocumentId()
+    {
+        if (!isset($this->global_document_id)) {
+            if (isset($this->domain_id) && $this->document_id) {
+                $this->global_document_id = self::generateGlobalDocumentId($this->domain_id, $this->document_id);
+            } else {
+                throw DomainException('This document has no identity');
+            }
+        }
+        return $this->global_document_id;
+    }
     /**
      * @todo use Validator with DI
      * @todo remove static method from standard class, use abstract or another
@@ -48,5 +71,19 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
     /**
      * 
      */
-    abstract public function getSections();
+    public function getDefaultSectionsDef()
+    {
+        return $this->defaultSectionsDef;
+    }
+    
+    public function getSections()
+    {
+        return $this->sections;
+    }
+    
+    public function setSections(array $sections)
+    {
+        $this->sections = $sections;
+    }
+    
 }

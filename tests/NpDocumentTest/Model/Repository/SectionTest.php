@@ -107,6 +107,41 @@ class SectionTest extends \PHPUnit_Framework_TestCase
         $section = $this->object->createSection();
         $this->assertInstanceOf('NpDocument\Model\Section\SectionClass\Section', $section);
     }
+    /**
+     * @covers NpDocument\Model\Repository\Section::saveSections
+     * @todo   Implement testSaveSections().
+     */
+    public function testSaveSections()
+    {
+        // Remove the following lines when you implement this test.
+        $this->markTestIncomplete(
+          'This test has not been implemented yet.'
+        );
+    }
+
+    /**
+     * @covers NpDocument\Model\Repository\Section::saveSection
+     * @todo   Implement testSaveSection().
+     */
+    public function testSaveSection()
+    {
+        // Remove the following lines when you implement this test.
+        $this->markTestIncomplete(
+          'This test has not been implemented yet.'
+        );
+    }
+
+    /**
+     * @covers NpDocument\Model\Repository\Section::findSection
+     * @todo   Implement testFindSection().
+     */
+    public function testFindSection()
+    {
+        // Remove the following lines when you implement this test.
+        $this->markTestIncomplete(
+          'This test has not been implemented yet.'
+        );
+    }
 
     /**
      * @covers NpDocument\Model\Repository\Section::retrieveSectionFromDataContainer
@@ -120,7 +155,7 @@ class SectionTest extends \PHPUnit_Framework_TestCase
         $section = $this->object->retrieveSectionFromDataContainer($dataContainer);
         $this->assertInstanceOf('NpDocument\Model\Section\SectionClass\Section', $section);
     }
-    
+
     /**
      * @expectedException NpDocument\Exception\DomainException
      */
@@ -131,5 +166,53 @@ class SectionTest extends \PHPUnit_Framework_TestCase
         $dataContainer = new DataContainer;
         $section = $this->object->retrieveSectionFromDataContainer($dataContainer);
         $this->assertInstanceOf('NpDocument\Model\Section\SectionClass\Section', $section);
+    }
+    
+    /**
+     * @covers NpDocument\Model\Repository\Section::retrieveSections
+     * @todo   Implement testRetrieveSections().
+     */
+    public function testRetrieveSections()
+    {
+        // Remove the following lines when you implement this test.
+        $this->markTestIncomplete(
+          'This test has not been implemented yet.'
+        );
+    }
+
+    /**
+     * @covers NpDocument\Model\Repository\Section::retrieveBranchSections
+     * @todo   Implement testRetrieveBranchSections().
+     */
+    public function testRetrieveBranchSections()
+    {
+        // Remove the following lines when you implement this test.
+        $this->markTestIncomplete(
+          'This test has not been implemented yet.'
+        );
+    }
+
+    /**
+     * @covers NpDocument\Model\Repository\Section::setDomain
+     * @todo   Implement testSetDomain().
+     */
+    public function testSetDomain()
+    {
+        // Remove the following lines when you implement this test.
+        $this->markTestIncomplete(
+          'This test has not been implemented yet.'
+        );
+    }
+
+    /**
+     * @covers NpDocument\Model\Repository\Section::getDomain
+     * @todo   Implement testGetDomain().
+     */
+    public function testGetDomain()
+    {
+        // Remove the following lines when you implement this test.
+        $this->markTestIncomplete(
+          'This test has not been implemented yet.'
+        );
     }
 }
