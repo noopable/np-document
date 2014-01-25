@@ -32,28 +32,22 @@ use Zend\Db\TableGateway\TableGatewayInterface;
 class Document extends AbstractDbTableRepository implements DomainAwareInterface
 {
 use DomainAwareTrait;
-    /**
-     *
-     * @var TableGatewayInterface
-     */
-    protected $sectionTable;
-    
+
     protected $sectionRepository;
-    
+
     /**
      *　現在対象にしている組織識別ID
-     * 
-     * @var integer 
+     *
+     * @var integer
      */
     protected $domainId;
 
 
     public function getGlobalDocumentId($documentId)
     {
-        $domainId = $this->getDomain()->getDomainId();
-        return AbstractDocument::generateGlobalDocumentId($domainId, $documentId);
+        return AbstractDocument::generateGlobalDocumentId($this->getDomainId(), $documentId);
     }
-    
+
     public function setDomainId($domainId = null)
     {
         if (null === $domainId) {
@@ -63,10 +57,10 @@ use DomainAwareTrait;
                 throw new DomainException('cant\'t set domainId mismatched to injected domain');
             }
         }
-        
+
         $this->domainId = $domainId;
     }
-    
+
     public function getDomainId()
     {
         if (!isset($this->domainId)) {
@@ -74,32 +68,32 @@ use DomainAwareTrait;
         }
         return $this->domainId;
     }
-    
+
     public function setSectionRepository(SectionRepository $sectionRepository)
     {
         $this->sectionRepository = $sectionRepository;
     }
-    
+
     public function getSectionRepository()
     {
         return $this->sectionRepository;
     }
-    
+
     public function createDocument($params = null)
     {
-        
+
     }
-    
+
     public function getDocumentDigestCollection($where, $limit)
     {
         //Baseセクション、DigestセクションだけをJOINしたDocumentCollection
     }
-    
+
     public function getDocumentCollection ($where, $limit = null)
     {
         $where['domain_id'] = $this->getDomainId();
     }
-    
+
     public function getDocument($documentId)
     {
         //global化しなくても検索できるが。primary keyによる検索の方が速い。
@@ -109,17 +103,17 @@ use DomainAwareTrait;
         $this->getSectionRepository()->retrieveBranchSections($entity);
         return $entity;
     }
-    
+
     public function getDocumentBranch($documentId, $branchId)
     {
-        
+
     }
-    
+
     public function getDocumentOwnedCurrentUser($documentId)
     {
-        
+
     }
-    
+
     /**
      * すべてのブランチ、すべてのセクションを含む
      * @param type $globalDocumentId
@@ -131,7 +125,7 @@ use DomainAwareTrait;
         $this->getSectionRepository()->retrieveSections($entity);
         return $entity;
     }
-    
+
     public function findDocument($where = null)
     {
         //findでは、検索対象が問題になる。
@@ -148,7 +142,7 @@ use DomainAwareTrait;
         $resultSet = $this->dao->selectWith($select);
         return $resultSet->current();
     }
-    
+
     public function saveDocument(DocumentInterface $document)
     {
         $target = clone $document;
