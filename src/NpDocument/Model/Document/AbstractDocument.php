@@ -11,6 +11,7 @@ use Flower\Model\AbstractEntity;
 use NpDocument\Model\Exception\DomainException;
 use NpDocument\Model\Exception\RuntimeException;
 use NpDocument\Model\Document\DocumentInterface;
+use NpDocument\Model\Document\Service\AbstractService;
 
 /**
  *
@@ -89,7 +90,12 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
         $this->sections = $sections;
     }
 
-    public function addService($name, $service)
+    /**
+     *
+     * @param string $name
+     * @param \NpDocument\Model\Document\Service\AbstractService $service
+     */
+    public function addService($name, AbstractService $service)
     {
         $this->services[$name] = $service;
     }
