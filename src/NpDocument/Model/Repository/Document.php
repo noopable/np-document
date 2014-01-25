@@ -11,8 +11,8 @@ use Flower\Model\AbstractDbTableRepository;
 use NpDocument\Exception\DomainException;
 use NpDocument\Model\Document\AbstractDocument;
 use NpDocument\Model\Document\DocumentInterface;
-use NpDocument\Model\Domain\DomainAwareInterface;
-use NpDocument\Model\Domain\DomainAwareTrait;
+use Flower\Domain\DomainAwareInterface;
+use Flower\Domain\DomainAwareTrait;
 use NpDocument\Model\Repository\Section as SectionRepository;
 use Zend\Db\TableGateway\TableGatewayInterface;
 
