@@ -29,7 +29,7 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
     protected function tearDown()
     {
     }
-    
+
     /**
      * @covers NpDocument\Model\Document\AbstractDocument::getIdentifier
      * @todo   Implement testGetIdentifier().
@@ -72,7 +72,7 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
         $this->object->setSections($sections);
         $this->assertEquals($sections, TestTool::getPropertyValue($this->object, 'sections'));
     }
-    
+
     /**
      * @depends testSetSections
      * @covers NpDocument\Model\Document\AbstractDocument::getSections
@@ -84,5 +84,50 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($sections, $this->object->getSections());
     }
 
+    /**
+     * @covers NpDocument\Model\Document\AbstractDocument::addService
+     */
+    public function testAddService()
+    {
+        $service = new \stdClass;
+        $this->object->addService('foo', $service);
+        $this->assertSame($service, TestTool::getPropertyValue($this->object, 'services')['foo']);
+    }
 
+    /**
+     * @covers NpDocument\Model\Document\AbstractDocument::removeService
+     */
+    public function testRemoveService()
+    {
+        $service = new \stdClass;
+        $this->object->addService('foo', $service);
+        $this->assertSame($service, TestTool::getPropertyValue($this->object, 'services')['foo']);
+        $this->object->removeService('foo');
+        $this->assertEmpty(TestTool::getPropertyValue($this->object, 'services'));
+    }
+
+    /**
+     * @covers NpDocument\Model\Document\AbstractDocument::__call
+     */
+    public function test__call()
+    {
+        $service = $this->getMock('stdClass', array('doSomething'));
+        $service->expects($this->once())
+                ->method('doSomething')
+                ->with($this->equalTo('foo'), $this->equalTo('bar'))
+                ->will($this->returnValue('baz'));
+        $this->object->addService('mock', $service);
+        $this->assertEquals('baz', $this->object->mock_doSomething('foo', 'bar'));
+    }
+
+    /**
+     * @expectedException NpDocument\Model\Exception\RuntimeException
+     */
+    public function test__callToNoMethod()
+    {
+        $service = $this->getMock('stdClass', array('doSomething'));
+        $service->expects($this->never())->method('doSomething');
+        $this->object->addService('mock', $service);
+        $this->assertEquals('baz', $this->object->noop_doSomething('foo', 'bar'));
+    }
 }

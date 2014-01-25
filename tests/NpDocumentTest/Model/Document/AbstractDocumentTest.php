@@ -48,18 +48,18 @@ class AbstractDocumentTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('00FFFF' . $delimiter . '000400', AbstractDocument::generateGlobalDocumentId(65535, 1024));
         $this->assertEquals($expected . $delimiter . '000800', AbstractDocument::generateGlobalDocumentId(hexdec($expected), 2048));
     }
-    
+
     /**
-     * @expectedException NpDocument\Exception\DomainException
+     * @expectedException NpDocument\Model\Exception\DomainException
      */
     public function testGenerateGlobalDocumentIdWithSignedInt()
     {
         AbstractDocument::generateGlobalDocumentId(-65535, 1024);
     }
-    
+
     /**
-     * 
-     * @expectedException NpDocument\Exception\DomainException
+     *
+     * @expectedException NpDocument\Model\Exception\DomainException
      */
     public function testGenerateGlobalDocumentIdWithOverflowAgainstSortByString()
     {
