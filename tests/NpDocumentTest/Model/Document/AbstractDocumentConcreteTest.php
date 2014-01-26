@@ -87,7 +87,7 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
     /**
      * @covers NpDocument\Model\Document\AbstractDocument::setService
      */
-    public function testAddService()
+    public function testSetService()
     {
         $abstractName = 'NpDocument\Model\Document\Service\AbstractService';
         $service = $this->getMock($abstractName, array('doSomething'), array($this->object));
@@ -123,6 +123,24 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
                 ->will($this->returnValue('baz'));
         $this->object->setService('mock', $service);
         $this->assertEquals('baz', $this->object->mock_doSomething('foo', 'bar'));
+    }
+
+    public function test__callClassStringService()
+    {
+        $class = 'NpDocumentTest\Model\Document\Service\TestAsset\ConcreteService';
+        $this->object->setService('foo', $class);
+        $this->assertEquals(array('foo', 'bar'), $this->object->foo_doSomething('foo', 'bar'));
+        $this->assertInstanceOf($class, TestTool::getPropertyValue($this->object, 'services')['foo']);
+    }
+
+    /**
+     * @expectedException NpDocument\Model\Exception\RuntimeException
+     * @expectedExceptionMessage compatile with AbstractService
+     */
+    public function test__callInvalidClassString()
+    {
+        $this->object->setService('foo', 'ArrayObject');
+        $this->object->foo_current('foo', 'bar');
     }
 
     /**

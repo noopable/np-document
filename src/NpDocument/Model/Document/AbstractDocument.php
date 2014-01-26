@@ -11,7 +11,6 @@ use Flower\Model\AbstractEntity;
 use NpDocument\Model\Exception\DomainException;
 use NpDocument\Model\Exception\RuntimeException;
 use NpDocument\Model\Document\DocumentInterface;
-use NpDocument\Model\Document\Service\AbstractService;
 
 /**
  *
@@ -95,7 +94,7 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
      * @param string $name
      * @param \NpDocument\Model\Document\Service\AbstractService $service
      */
-    public function setService($name, AbstractService $service)
+    public function setService($name, $service)
     {
         $this->services[$name] = $service;
     }
@@ -109,15 +108,40 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
 
     public function __call($name, $arguments)
     {
-        if (($pos = strpos($name, '_')) > 0 ) {
-            list($serviceName, $methodName) = array_merge(explode('_', $name, 2), array(''));
-            if (isset($this->services[$serviceName])) {
-                $service = $this->services[$serviceName];
-                if (method_exists($service, $methodName)) {
-                    return call_user_func_array(array($service, $methodName), $arguments);
-                }
+        if (! ($pos = strpos($name, '_')) > 0 ) {
+            throw new RuntimeException('undefined method:' . $name);
+        }
+
+        list($serviceName, $methodName) = array_merge(explode('_', $name, 2), array(''));
+        if (! isset($this->services[$serviceName])) {
+            throw new RuntimeException('undefined service:'. $serviceName . ' with method :' . $name);
+        }
+
+        $service = $this->services[$serviceName];
+
+        if (is_string($service)) {
+            if (! class_exists($service)) {
+                throw new RuntimeException('specified class name (' . $service . ') is not found');
+            }
+            // prefer compatible constructor style with AbstractService
+            try {
+                //flyweight is AbstractService's task.
+                //  - Service can omit setService
+                //  - We can set service with servicename from external scope.
+                $service = new $service($this, $serviceName);
+            } catch (\Exception $ex) {
+                throw new RuntimeException('prefer service constructor to have compatile with AbstractService. Or you can set instance directory with setService', $ex->getCode(), $ex);
             }
         }
-        throw new RuntimeException('method can\'t call ' . $name);
+
+        if (! is_object($service)) {
+            throw new RuntimeException('unknown service type :' . gettype($service));
+        }
+
+        if (! method_exists($service, $methodName)) {
+            throw new RuntimeException('method can\'t call ' . $name);
+        }
+        // at last, invoke
+        return call_user_func_array(array($service, $methodName), $arguments);
     }
 }
