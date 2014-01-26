@@ -21,6 +21,6 @@ abstract class AbstractService {
     public function __construct(DocumentInterface $document)
     {
         $this->document = $document;
-        $document->addService($this->name, $this);
+        $document->setService($this->name, $this);
     }
 }

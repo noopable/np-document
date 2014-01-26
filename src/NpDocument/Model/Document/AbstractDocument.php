@@ -95,7 +95,7 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
      * @param string $name
      * @param \NpDocument\Model\Document\Service\AbstractService $service
      */
-    public function addService($name, AbstractService $service)
+    public function setService($name, AbstractService $service)
     {
         $this->services[$name] = $service;
     }

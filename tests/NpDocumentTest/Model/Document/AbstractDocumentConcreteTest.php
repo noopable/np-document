@@ -85,13 +85,13 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers NpDocument\Model\Document\AbstractDocument::addService
+     * @covers NpDocument\Model\Document\AbstractDocument::setService
      */
     public function testAddService()
     {
         $abstractName = 'NpDocument\Model\Document\Service\AbstractService';
         $service = $this->getMock($abstractName, array('doSomething'), array($this->object));
-        $this->object->addService('foo', $service);
+        $this->object->setService('foo', $service);
         $this->assertSame($service, TestTool::getPropertyValue($this->object, 'services')['foo']);
     }
 
@@ -102,7 +102,7 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
     {
         $abstractName = 'NpDocument\Model\Document\Service\AbstractService';
         $service = $this->getMock($abstractName, array('doSomething'), array($this->object));
-        $this->object->addService('foo', $service);
+        $this->object->setService('foo', $service);
         $this->assertSame($service, TestTool::getPropertyValue($this->object, 'services')['foo']);
         //auto add in constructor
         $this->object->removeService('Abstract');
@@ -121,7 +121,7 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
                 ->method('doSomething')
                 ->with($this->equalTo('foo'), $this->equalTo('bar'))
                 ->will($this->returnValue('baz'));
-        $this->object->addService('mock', $service);
+        $this->object->setService('mock', $service);
         $this->assertEquals('baz', $this->object->mock_doSomething('foo', 'bar'));
     }
 
@@ -133,7 +133,7 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
         $abstractName = 'NpDocument\Model\Document\Service\AbstractService';
         $service = $this->getMock($abstractName, array('doSomething'), array($this->object));
         $service->expects($this->never())->method('doSomething');
-        $this->object->addService('mock', $service);
+        $this->object->setService('mock', $service);
         $this->assertEquals('baz', $this->object->noop_doSomething('foo', 'bar'));
     }
 }
