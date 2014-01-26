@@ -11,7 +11,7 @@ class DataContainerTest extends \PHPUnit_Framework_TestCase
      * @var DataContainer
      */
     protected $object;
-    
+
     /**
      *
      * @var \ReflectionObject
@@ -166,13 +166,13 @@ class DataContainerTest extends \PHPUnit_Framework_TestCase
         $xmlString1 = '<?xml version="1.0" encoding="UTF-8"?><zend-config/>';
         $res1 = $this->object->getSectionProperties();
         $this->assertXmlStringEqualsXmlString($xmlString1, $res1);
-        
+
         $xmlString2 = '<?xml version="1.0" encoding="UTF-8"?><zend-config><foo>bar</foo></zend-config>';
         $this->object->setSectionProperties($xmlString2);
         $res2 = $this->object->getSectionProperties();
         $this->assertXmlStringEqualsXmlString($xmlString2, $res2);
     }
-    
+
     /**
      * @covers NpDocument\Model\Section\DataContainer::setStatusFlag
      */
@@ -184,7 +184,7 @@ class DataContainerTest extends \PHPUnit_Framework_TestCase
         $status = $prop->getValue($this->object);
         $this->assertTrue(isset($status['foo']));
     }
-    
+
     /**
      * @covers NpDocument\Model\Section\DataContainer::getStatusFlag
      */
@@ -245,7 +245,7 @@ class DataContainerTest extends \PHPUnit_Framework_TestCase
         $this->object->setPriority($commaSeparated);
         $this->assertEquals($commaSeparated, $this->object->getPriority());
     }
-    
+
     /**
      * @covers NpDocument\Model\Section\DataContainer::convertSetToInt
      */
@@ -256,7 +256,7 @@ class DataContainerTest extends \PHPUnit_Framework_TestCase
         $res = $this->object->convertSetToInt($set, $target);
         $this->assertEquals(9, $res);
     }
-    
+
     /**
      * @depends testConvertSetToInt
      * @covers NpDocument\Model\Section\DataContainer::getPriorityInt
@@ -276,11 +276,26 @@ class DataContainerTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers NpDocument\Model\Section\DataContainer::setBranchSet
-     * @todo   getArrayCopyしたときのbranch_setのデータと矛盾していないかのチェックが必要
      */
     public function testSetBranchSet()
     {
         $commaSeparated = '1,2,3';
+        $this->object->setBranchSet($commaSeparated);
+        $prop = $this->ref->getProperty('branchSet');
+        $prop->setAccessible(true);
+        $branchSet = $prop->getValue($this->object);
+        $this->assertContains(1, $branchSet);
+        $this->assertContains(2, $branchSet);
+        $this->assertContains(3, $branchSet);
+        $this->assertEquals(3, $branchSet[3]);
+    }
+
+    /**
+     * @covers NpDocument\Model\Section\DataContainer::setBranchSet
+     */
+    public function testSetBranchSetByArray()
+    {
+        $commaSeparated = array(1,2,3);
         $this->object->setBranchSet($commaSeparated);
         $prop = $this->ref->getProperty('branchSet');
         $prop->setAccessible(true);
@@ -301,6 +316,12 @@ class DataContainerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($commaSeparated, $this->object->getBranchSet());
     }
 
+    public function testGetBranchSetByArray()
+    {
+        $commaSeparated = '1,2,3';
+        $this->object->setBranchSet($commaSeparated);
+        $this->assertEquals(array(1 => 1, 2 => 2, 3 => 3), $this->object->getBranchSet(true));
+    }
     /**
      * @covers NpDocument\Model\Section\DataContainer::setOriginate
      */
@@ -312,12 +333,12 @@ class DataContainerTest extends \PHPUnit_Framework_TestCase
         $sectionRev = 523;
         $this->object->originate($domainId, $documentId, $sectionName, $sectionRev);
         $this->assertEquals('34BAAF-051ABB-content.523', $this->object->global_section_id);
-        
+
         //Revision Up
         $this->object->originate(++$domainId, ++$documentId, $sectionName, ++$sectionRev, true);
         $this->assertEquals('34BAB0-051ABC-content.524', $this->object->global_section_id);
     }
-    
+
     /**
      * @expectedException NpDocument\Exception\DomainException
      */
@@ -339,7 +360,7 @@ class DataContainerTest extends \PHPUnit_Framework_TestCase
         $this->object->offsetSet('content', 'foo');
         $this->assertEquals('foo', $this->object->content);
     }
-    
+
     /**
      * @expectedException NpDocument\Exception\DomainException
      */
@@ -347,7 +368,7 @@ class DataContainerTest extends \PHPUnit_Framework_TestCase
     {
         $this->object->offsetSet('foo', 'bar');
     }
-    
+
     /**
      * @expectedException NpDocument\Exception\DomainException
      */
@@ -364,5 +385,30 @@ class DataContainerTest extends \PHPUnit_Framework_TestCase
     {
         $this->object->offsetSet('content', 'foo');
         $this->assertEquals('foo', $this->object->offsetGet('content'));
+    }
+
+    public function testGetArrayCopy()
+    {
+        $this->object->content = 'foo';
+        $this->object->domain_id = 345;
+        $this->object->branch_set = array(1,2,3);
+        $this->object->setStatus('foo,bar,baz');
+
+        $expected = Array (
+            'content' => 'foo',
+            'domain_id' => 345,
+            'branch_set' => '1,2,3',
+            'status' => 'foo,bar,baz',
+        );
+        $this->assertEquals($expected, $this->object->getArrayCopy());
+
+        $this->object->setBranchSet('2,3,4');
+        $expected = Array (
+            'content' => 'foo',
+            'domain_id' => 345,
+            'branch_set' => '2,3,4',
+            'status' => 'foo,bar,baz',
+        );
+        $this->assertEquals($expected, $this->object->getArrayCopy());
     }
 }

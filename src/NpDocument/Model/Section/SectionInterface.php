@@ -19,4 +19,5 @@ interface SectionInterface {
     public function __construct(Config $config = null);
     public function setDataContainer(AbstractEntity $dataContainer);
     public function getDataContainer();
+    public function getBranchSet($byArray = false);
 }

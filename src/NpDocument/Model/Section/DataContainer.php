@@ -13,7 +13,7 @@ use NpDocument\Exception\DomainException;
 use NpDocument\Model\Document\AbstractDocument;
 use NpDocument\Model\Document\DocumentInterface;
 use Zend\Config\Exception\RuntimeException as ConfigRuntimeException;
-use Zend\Config\Writer\Xml as ConfigWriter; 
+use Zend\Config\Writer\Xml as ConfigWriter;
 use Zend\Config\Reader\Xml as ConfigReader;
 /**
  * データベースとのデータ交換キャリア
@@ -21,25 +21,25 @@ use Zend\Config\Reader\Xml as ConfigReader;
  */
 class DataContainer extends AbstractEntity
 {
-    
+
     protected $identifier = array('domain_id', 'document_id', 'section_name', 'section_rev');
-    
+
     protected $properties = array();
-    
+
     protected $status = array();
-    
+
     protected $priority = array();
-    
+
     protected $priorityStrings = array(
         '9','8','7','6','5','4','3','2','1','low','medium-low','medium','medium-hight','high','hidden_bottom','fixed_bottom','footer','content_post','content','content_pre','header','fixed_top','hidden_top'
     );
-    
+
     protected $branchSet = array();
-    
+
     protected $xmlConfigReader;
-    
+
     protected $xmlConfigWriter;
-    
+
     protected $immutableColumns = array(
         'global_section_id',
         'global_document_id',
@@ -48,14 +48,14 @@ class DataContainer extends AbstractEntity
         'section_name',
         'section_rev',
     );
-    
+
     protected $setterGetterColumns = array(
         'section_properties',
         'status',
         'priority',
         'branch_set',
     );
-    
+
     protected $columns = array (
         'global_section_id' => 'global_section_id',
         'global_document_id' => 'global_document_id',
@@ -80,37 +80,37 @@ class DataContainer extends AbstractEntity
         'section_to_string' => 'section_to_string',
         'section_note' => 'section_note',
     );
-    
+
     public function setIdentifier(array $identifier)
     {
         $this->identifier = $identifier;
     }
-    
+
     public function getIdentifier()
     {
         return $this->identifier;
     }
-    
+
     /**
-     * 
+     *
      * @param integer $domainId
      * @param integer $documentId
      */
     public static function generateGlobalSectionId($domainId, $documentId, $sectionName, $sectionRev)
     {
         $globalDocumentId = AbstractDocument::generateGlobalDocumentId($domainId, $documentId);
-        
+
         /**
          * @todo use Validator with DI
          */
         if (!is_string($sectionName)) {
             throw new DomainException('section_name should be string');
         }
-        
+
         if (!is_int($sectionRev)) {
             throw new DomainException('section_rev should be int');
         }
-        
+
         switch (true) {
             case empty($sectionName):
                 throw new DomainException('section_name should not be empty');
@@ -121,17 +121,17 @@ class DataContainer extends AbstractEntity
             case ($sectionRev > 9999):
                 throw new DomainException('rev is too large');
         }
-        
-        return sprintf($globalDocumentId . DocumentInterface::GLOBAL_DOCUMENT_DELIMITER . 
+
+        return sprintf($globalDocumentId . DocumentInterface::GLOBAL_DOCUMENT_DELIMITER .
                 '%s' . SectionInterface::SECTION_REV_DELIMITER . '%u', $sectionName, $sectionRev);
-        
+
     }
-    
+
     public function setXmlConfigReader(ConfigReader $xmlConfigReader)
     {
         $this->xmlConfigReader = $xmlConfigReader;
     }
-    
+
     public function getXmlConfigReader()
     {
         if (!isset($this->xmlConfigReader)) {
@@ -139,12 +139,12 @@ class DataContainer extends AbstractEntity
         }
         return $this->xmlConfigReader;
     }
-    
+
     public function setXmlConfigWriter(ConfigWriter $xmlConfigWriter)
     {
         $this->xmlConfigWriter = $xmlConfigWriter;
     }
-    
+
     public function getXmlConfigWriter()
     {
         if (!isset($this->xmlConfigWriter)) {
@@ -152,25 +152,25 @@ class DataContainer extends AbstractEntity
         }
         return $this->xmlConfigWriter;
     }
-    
+
     public function setProperty($name, $value)
     {
         $this->properties[$name] = $value;
     }
-    
+
     public function getProperty($name)
     {
         if (isset($this->properties[$name])) {
             return $this->properties[$name];
         }
     }
-    
+
     public function issetProperty($name)
     {
         return isset($this->properties[$name]);
     }
     /**
-     * 
+     *
      * @param string $properties XML
      */
     public function setSectionProperties($xmlString)
@@ -187,7 +187,7 @@ class DataContainer extends AbstractEntity
         }
         parent::offsetSet('section_properties', $xmlString);
     }
-    
+
     /**
      * @return string XML
      */
@@ -197,7 +197,7 @@ class DataContainer extends AbstractEntity
         parent::offsetSet('section_properties', $xmlString);
         return $xmlString;
     }
-    
+
     public function setStatusFlag($state, $flag = true)
     {
         if ($flag) {
@@ -208,28 +208,28 @@ class DataContainer extends AbstractEntity
             }
         }
     }
-    
+
     public function getStatusFlag($state)
     {
         return isset($this->status[$state]);
     }
-    
+
     public function setStatus($commaSeparated)
     {
         $setArray = array_flip(array_flip(explode(',', $commaSeparated)));
         $this->status = array_combine($setArray, $setArray);
         parent::offsetSet('status', $commaSeparated);
     }
-    
+
     public function getStatus()
     {
         $commaSeparated = implode(',', $this->status);
         parent::offsetSet('status', $commaSeparated);
         return $commaSeparated;
     }
-        
+
     /**
-     * 
+     *
      * @param string $commaSeparated
      */
     public function setPriority($commaSeparated)
@@ -238,9 +238,9 @@ class DataContainer extends AbstractEntity
         $this->priority = array_combine($setArray, $setArray);
         parent::offsetSet('priority', $commaSeparated);
     }
-    
+
     /**
-     * 
+     *
      * @return string comma separated
      */
     public function getPriority()
@@ -249,26 +249,41 @@ class DataContainer extends AbstractEntity
         parent::offsetSet('priority', $commaSeparated);
         return $commaSeparated;
     }
-    
+
     public function getPriorityInt()
     {
         return $this->convertSetToInt($this->priorityStrings, $this->priority);
     }
-    
-    public function setBranchSet($commaSeparated)
+
+    /**
+     * データベースから取得したカラム一覧を元に、branch_setのデータが
+     * ここからセットされる。
+     * 一方、クライアントからデータを投入されることもあるだろう。
+     * @param type $commaSeparated
+     */
+    public function setBranchSet($commaSeparated = null)
     {
-        $setArray = array_flip(array_flip(explode(',', $commaSeparated)));
+        if (is_string($commaSeparated)) {
+            $setArray = array_flip(array_flip(explode(',', $commaSeparated)));
+        } elseif(is_array($commaSeparated)) {
+            $setArray = $commaSeparated;
+        } elseif (null === $commaSeparated) {
+            $setArray = array();
+        } else {
+            throw new DomainException('type of branch_set is invalid');
+        }
         $this->branchSet = array_combine($setArray, $setArray);
-        parent::offsetSet('branch_set', $commaSeparated);
+        parent::offsetSet('branch_set', implode(',', $setArray));
     }
-    
-    public function getBranchSet()
+
+    public function getBranchSet($byArray = false)
     {
-        $commaSeparated = implode(',', $this->branchSet);
-        parent::offsetSet('branch_set', $commaSeparated);
-        return $commaSeparated;
+        if ($byArray) {
+            return $this->branchSet;
+        }
+        return implode(',', $this->branchSet);
     }
-    
+
     public function convertSetToInt($setArray, $targetArray)
     {
         $keys = array_keys(array_intersect($setArray, $targetArray));
@@ -278,7 +293,7 @@ class DataContainer extends AbstractEntity
         }
         return $int;
     }
-    
+
     public function originate($domainId, $documentId, $sectionName, $sectionRev, $force = false)
     {
         $this->privateOffsetSet('domain_id', $domainId, $force);
@@ -288,9 +303,9 @@ class DataContainer extends AbstractEntity
         $globalSectionId = self::generateGlobalSectionId($domainId, $documentId, $sectionName, $sectionRev);
         $this->privateOffsetSet('global_section_id', $globalSectionId, $force);
     }
-    
+
     /**
-     * 
+     *
      * @param string $name
      * @param mixed $value
      * @return void
@@ -298,7 +313,7 @@ class DataContainer extends AbstractEntity
     private function privateOffsetSet($name, $value, $force = false)
     {
         if (isset($this->columns[$name])) {
-            if (!$force 
+            if (!$force
                 && false !== array_search($name, $this->immutableColumns)
                 && $this->offsetExists($name)) {
                 throw new DomainException('specified column is immutable. Don\'t overwrite it. make new container with new id');
@@ -310,7 +325,7 @@ class DataContainer extends AbstractEntity
     /**
      * データコンテナはデータベースcolumn以外のキーを暗黙的にセットしない
      * エンティティを特定するcolumnは暗黙的な上書きは不可
-     * 
+     *
      * @param string $name
      * @param mixed $value
      * @return void
@@ -321,28 +336,28 @@ class DataContainer extends AbstractEntity
         if (!isset($this->columns[$name])) {
             throw new DomainException('specified name ' . $name .' is not in columns');
         }
-        
+
         if (false !== array_search($name, $this->immutableColumns)
                 && $this->offsetExists($name)) {
             throw new DomainException('specified column is immutable. Don\'t overwrite it. make new container with new id');
         }
-        
+
         if (false !== array_search($name, $this->setterGetterColumns)) {
             $setter = 'set' . str_replace(' ', '', ucwords(str_replace('_', ' ', $name)));
             return $this->{$setter}($value);
         }
-        
+
         return parent::offsetSet($name, $value);
     }
-    
+
     public function offsetGet($name)
     {
         if (false !== array_search($name, $this->setterGetterColumns)) {
             $setter = 'get' . str_replace(' ', '', ucwords(str_replace('_', ' ', $name)));
             return $this->{$setter};
         }
-        
+
         return parent::offsetGet($name);
     }
-    
+
 }

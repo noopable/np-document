@@ -21,7 +21,7 @@ abstract class AbstractSection extends \PHPUnit_Framework_TestCase
     {
         $this->object = new Section;
     }
-    
+
     /**
      * Tears down the fixture, for example, closes a network connection.
      * This method is called after a test is executed.
@@ -37,12 +37,12 @@ abstract class AbstractSection extends \PHPUnit_Framework_TestCase
     {
         //何もしなければデフォルトのDataContainerを取得できる
         $this->assertInstanceOf('NpDocument\Model\Section\DataContainer', $this->object->getDataContainer());
-        
+
         //dataContainerプロパティに設定されたオブジェクトを取得できる
         $ref = new \ReflectionObject($this->object);
         $prop = $ref->getProperty('dataContainer');
         $prop->setAccessible(true);
-        
+
         $customContainer = $this->getMock('Flower\Model\AbstractEntity');
         $prop->setValue($this->object, $customContainer);
 
@@ -50,7 +50,7 @@ abstract class AbstractSection extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * 
+     *
      * @depends testGetDataContainer
      * @covers NpDocument\Model\Section\SectionClass\Section::setDataContainer
      */
@@ -60,11 +60,11 @@ abstract class AbstractSection extends \PHPUnit_Framework_TestCase
         $this->object->setDataContainer($customContainer);
         $this->assertSame($customContainer, $this->object->getDataContainer());
     }
-    
+
     /**
      * __isset と isset($object)は等価であり内部DataContainerを使っているの確認
      * DataContainerの仕様はチェック対象ではない
-     * 
+     *
      * @depends testSetDataContainer
      * @covers NpDocument\Model\Section\SectionClass\Section::__isset
      */
@@ -75,28 +75,28 @@ abstract class AbstractSection extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->object->__isset('foo'), 'no action has none');
         /**
          * without setting a data container, use default container
-         * container claimes valid column name 
+         * container claimes valid column name
          * @see NpDocument\Model\Section\DataContainer
          */
         $this->object->content = 'bar';
         $this->assertTrue(isset($this->object->content), 'isset property');
         $this->assertTrue($this->object->__isset('content'), 'object has property');
-        
+
         //with data container late set
         $dataContainer = new DataContainer;
         $this->object->setDataContainer($dataContainer);
         $this->assertFalse(isset($this->object->content), 'replaced data container lost previous index');
         $this->assertFalse($this->object->__isset('content'), 'with replaced data container');
-        
+
         //with data container having property
         $dataContainer->content = 'bar';
         $this->assertTrue(isset($this->object->content), 'data container having property1');
         $this->assertTrue($this->object->__isset('content'), 'data container having property2');
-        
+
     }
-    
+
     /**
-     * 
+     *
      * @depends test__isset
      * @covers NpDocument\Model\Section\SectionClass\Section::__get
      */
@@ -104,7 +104,7 @@ abstract class AbstractSection extends \PHPUnit_Framework_TestCase
     {
         /**
          * Why we use key name "content"?
-         * DataContainer claimes valid column name 
+         * DataContainer claimes valid column name
          * @see NpDocument\Model\Section\DataContainer
          */
         $this->object->content = 'bar';
@@ -112,17 +112,17 @@ abstract class AbstractSection extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('bar', $this->object->content);
         $this->assertEquals('bar', $this->object->__get('content'));
-        
+
         $dataContainer = new DataContainer;
         $this->object->setDataContainer($dataContainer);
         $this->assertFalse(isset($this->object->content));
-        
+
         //property accesses dataContainer's property
         $dataContainer->content = 'baz';
         $this->assertNotEquals('bar', $this->object->content);
         $this->assertEquals('baz', $this->object->content);
     }
-    
+
     /**
      * @covers NpDocument\Model\Section\SectionClass\Section::__Set
      */
@@ -134,5 +134,29 @@ abstract class AbstractSection extends \PHPUnit_Framework_TestCase
                 ->with($this->equalTo('content'), $this->equalTo('bar'));
         $this->object->setDataContainer($dataContainer);
         $this->object->content = 'bar';
+    }
+
+    public function testGetBranchSet1()
+    {
+        $dataContainer = $this->getMock('NpDocument\Model\Section\DataContainer');
+        $dataContainer->expects($this->once())
+                ->method('getBranchSet')
+                ->with($this->equalTo(true))
+                ->will($this->returnValue(array(1, 2)));
+        $this->object->setDataContainer($dataContainer);
+        $res = $this->object->getBranchSet(true);
+        $this->assertEquals(array(1, 2), $res);
+    }
+
+    public function testGetBranchSet2()
+    {
+        $dataContainer = $this->getMock('NpDocument\Model\Section\DataContainer');
+        $dataContainer->expects($this->once())
+                ->method('getBranchSet')
+                ->with($this->equalTo(false))
+                ->will($this->returnValue('1,2'));
+        $this->object->setDataContainer($dataContainer);
+        $res = $this->object->getBranchSet(false);
+        $this->assertEquals('1,2', $res);
     }
 }

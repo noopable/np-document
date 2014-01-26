@@ -15,22 +15,22 @@ use NpDocument\Model\Section\SectionInterface;
 
 class Section implements SectionInterface
 {
-    
+
     /**
      *
      * @var Flower\Model\AbstractEntity
      */
     protected $dataContainer;
-    
+
     public function __construct(Config $config = null)
     {
         if (null !== $config) {
             $config->configure($this);
         }
     }
-    
+
     /**
-     * 
+     *
      * @return ArrayObject
      */
     public function getDataContainer()
@@ -45,20 +45,24 @@ class Section implements SectionInterface
     {
         $this->dataContainer = $dataContainer;
     }
-    
+
     public function __set($name, $value)
     {
         return $this->getDataContainer()->offsetSet($name, $value);
     }
-    
+
     public function __get($name)
     {
         return $this->getDataContainer()->offsetGet($name);
     }
-    
+
     public function __isset($name)
     {
         return $this->getDataContainer()->offsetExists($name);
     }
 
+    public function getBranchSet($byArray = false)
+    {
+        return $this->getDataContainer()->getBranchSet($byArray);
+    }
 }
