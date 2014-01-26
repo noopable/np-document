@@ -10,13 +10,13 @@ namespace NpDocument\Model\Document\DocumentClass;
 use NpDocument\Model\Document\AbstractDocument;
 
 /**
- * 
+ *
  */
 class Document extends AbstractDocument
 {
     protected $defaultSectionsDef = array(
         // section_name => section_class | array section builddef for SectionPluginManager
-        'base' => 'Base', 
+        'base' => 'Base',
         'tag' => array(
             'section_class' => 'Tag',
         ),

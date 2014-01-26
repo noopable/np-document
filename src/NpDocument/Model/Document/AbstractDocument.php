@@ -8,6 +8,7 @@
 namespace NpDocument\Model\Document;
 
 use Flower\Model\AbstractEntity;
+use Flower\TimeUtils;
 use NpDocument\Model\Exception\DomainException;
 use NpDocument\Model\Exception\RuntimeException;
 use NpDocument\Model\Document\DocumentInterface;
@@ -21,9 +22,18 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
 
     protected $defaultSectionsDef;
 
-    protected $services;
+    protected $services = array(
+        'branch' => 'NpDocument\Model\Document\Service\Branch',
+        'revision' => 'NpDocument\Model\Document\Service\Revision',
+    );
 
     protected $sections;
+
+    protected $currentBranchId;
+
+    protected $currentSections;
+
+    protected $tasks = array();
 
     public function getIdentifier()
     {
@@ -104,6 +114,69 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
         if (isset($this->services[$name])) {
             unset($this->services[$name]);
         }
+    }
+
+    public function setPublished($time = null)
+    {
+        $this->published = TimeUtils::mysqlFormatDatetime($time);
+    }
+
+    /**
+     * remove hash key and duplicate entry
+     * @return type
+     */
+    public function getTasks()
+    {
+        return array_flip(array_flip($this->tasks));
+    }
+
+    public function addTask($task)
+    {
+        $this->tasks[] = $task;
+    }
+
+    public function removeTask($task)
+    {
+        $taskFlip = array_flip($this->tasks);
+        if (isset($taskFlip[$task])) {
+            unset($taskFlip[$task]);
+        }
+        $this->tasks = array_flip($taskFlip);
+    }
+
+    public function setCurrentBranchId($branchId)
+    {
+        $this->currentBranchId = $branchId;
+        $this->updateCurrentSections();
+    }
+
+    public function getCurrentBranchId()
+    {
+        return $this->currentBranchId;
+    }
+
+    public function updateCurrentSections()
+    {
+        if (!isset($this->sections)) {
+            return;
+        }
+        
+        $branchId = $this->getCurrentBranchId();
+        if (null === $branchId) {
+            $this->currentSections = $this->sections;
+        }
+
+        $this->currentSections = array();
+        foreach ($this->sections as $key => $section) {
+            if (in_array($branchId, $section->getBranchSet(true))) {
+                $this->currentSections[$key] = $section;
+            }
+        }
+    }
+
+    public function getCurrentSections()
+    {
+        return $this->currentSections;
     }
 
     public function __call($name, $arguments)

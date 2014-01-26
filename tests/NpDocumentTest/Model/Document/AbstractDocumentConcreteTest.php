@@ -107,7 +107,9 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
         //auto add in constructor
         $this->object->removeService('Abstract');
         $this->object->removeService('foo');
-        $this->assertEmpty(TestTool::getPropertyValue($this->object, 'services'));
+        $services = TestTool::getPropertyValue($this->object, 'services');
+        $this->assertArrayNotHasKey('Abstract', $services);
+        $this->assertArrayNotHasKey('foo', $services);
     }
 
     /**
@@ -154,4 +156,119 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
         $this->object->setService('mock', $service);
         $this->assertEquals('baz', $this->object->noop_doSomething('foo', 'bar'));
     }
+
+    /**
+     * @covers NpDocument\Model\Document\AbstractDocument::setPublished
+     */
+    public function testSetPublished()
+    {
+        $this->assertFalse(isset($this->object->published));
+        $time = time();
+        $this->object->setPublished();
+        $timeAfter = time();
+        $result = $this->object->published;
+        $resultTime = strtotime($result);
+        $this->assertGreaterThanOrEqual($time, $resultTime);
+        $this->assertLessThanOrEqual($timeAfter, $resultTime);
+    }
+
+    public function testSetPublishedWithTime()
+    {
+        $time = 1390730623;
+        $this->object->setPublished($time);
+        $this->assertEquals('2014-01-26 19:03:43', $this->object->published);
+    }
+
+    /**
+     * @covers NpDocument\Model\Document\AbstractDocument::addTask
+     */
+    public function testAddTask()
+    {
+        $task = DocumentInterface::TASK_PUBLISH;
+        $this->object->addTask($task);
+        $this->assertEquals(array($task), TestTool::getPropertyValue($this->object, 'tasks'));
+    }
+
+    /**
+     * @depends testAddTask
+     * @covers NpDocument\Model\Document\AbstractDocument::getTasks
+     */
+    public function testGetTasks()
+    {
+        $task = DocumentInterface::TASK_PUBLISH;
+        $this->object->addTask($task);
+        $this->assertEquals(array($task), $this->object->getTasks());
+    }
+
+    /**
+     * @depends testGetTasks
+     * @covers NpDocument\Model\Document\AbstractDocument::removeTask
+     */
+    public function testRemoveTask()
+    {
+        $task = DocumentInterface::TASK_PUBLISH;
+        $this->object->addTask($task);
+        $this->assertEquals(array($task), $this->object->getTasks());
+        $this->object->removeTask($task);
+        $this->assertEmpty($this->object->getTasks());
+    }
+
+    /**
+     * @covers NpDocument\Model\Document\AbstractDocument::setCurrentBranchId
+     */
+    public function testSetCurrentBranchId()
+    {
+        $branchId = 12;
+        $this->object->setCurrentBranchId($branchId);
+        $this->assertEquals($branchId, TestTool::getPropertyValue($this->object, 'currentBranchId'));
+    }
+
+    /**
+     * @covers NpDocument\Model\Document\AbstractDocument::getCurrentBranchId
+     */
+    public function testGetCurrentBranchId()
+    {
+        $branchId = 12;
+        $this->object->setCurrentBranchId($branchId);
+        $this->assertEquals($branchId, $this->object->getCurrentBranchId());
+    }
+
+    /**
+     * @depends testGetSections
+     * @covers NpDocument\Model\Document\AbstractDocument::getCurrentSections
+     */
+    public function testGetCurrentSectionsWithoutCurrentBranchId()
+    {
+        $this->assertEmpty($this->object->getCurrentSections());
+        $section1 = $this->getMock('NpDocument\Model\Section\SectionInterface');
+        $section2 = $this->getMock('NpDocument\Model\Section\SectionInterface');
+        $this->object->setSections(array('base' => $section1, 'extended' => $section2));
+        $this->assertEmpty($this->object->getCurrentSections());
+    }
+
+    /**
+     * @covers NpDocument\Model\Document\AbstractDocument::updateCurrentSections
+     */
+    public function testUpdateCurrentSections()
+    {
+        $section1 = $this->getMock('NpDocument\Model\Section\SectionInterface');
+        $section1->expects($this->exactly(3))
+                ->method('getBranchSet')
+                ->with($this->equalTo(true))
+                ->will($this->returnValue(array(1,2)));
+        $section2 = $this->getMock('NpDocument\Model\Section\SectionInterface');
+        $section2->expects($this->exactly(3))
+                ->method('getBranchSet')
+                ->with($this->equalTo(true))
+                ->will($this->returnValue(array(1)));
+        $this->object->setSections(array('base' => $section1, 'extended' => $section2));
+        $this->object->setCurrentBranchId(1);
+        $this->assertEquals($this->object->getSections(), $this->object->getCurrentSections());
+        $this->object->setCurrentBranchId(2);
+        $this->assertCount(1, $this->object->getCurrentSections());
+        $this->assertSame($section1, current($this->object->getCurrentSections()));
+        $this->object->setCurrentBranchId(3);
+        $this->assertEmpty($this->object->getCurrentSections());
+    }
+
 }
