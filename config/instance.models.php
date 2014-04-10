@@ -9,7 +9,7 @@ return array(
         'SandboxTable' =>   'Zend\Db\TableGateway\TableGateway',
     ),
     'preferences' => array(
-    ),    
+    ),
     'DocumentTable' => array(
         'parameters' => array(
             'table' => 'document',
@@ -28,8 +28,8 @@ return array(
             'tableGateway' => 'DocumentTable',
         ),
         'injections' => array(
-            'setSectionPluginManager' => array(
-                array('NpDocument\Model\Section\SectionPluginManager'),
+            'setSectionRepository' => array(
+                array('NpDocument\Model\Repository\Section'),
             ),
         ),
     ),

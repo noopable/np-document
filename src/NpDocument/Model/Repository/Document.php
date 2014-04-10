@@ -89,9 +89,34 @@ use DomainAwareTrait;
         //Baseセクション、DigestセクションだけをJOINしたDocumentCollection
     }
 
+    /**
+     * 素のリストとして取得（あまり使わないと思う)
+     * @param array $where
+     * @param type $limit
+     */
     public function getDocumentCollection ($where, $limit = null)
     {
         $where['domain_id'] = $this->getDomainId();
+    }
+
+    public function getDigestCollection($where, $limit)
+    {
+        $digestStrategy = new DigestStrategy;
+        $digestStrategy->setWhere($where);
+        $digestStrategy->setLimit($limit);
+        return $this->getCollectionWithStrategy($digestStrategy);
+    }
+
+    public function getDocumentByName($documentName)
+    {
+        //グローバルに一意ではない。せめて、domainで絞る。
+        $where = array(
+            'domain_id' => $this->getDomainId(),
+            'document_name' => (string) $documentName,
+        );
+        $entity = $this->getEntity($where);
+        $this->getSectionRepository()->retrieveBranchSections($entity);
+        return $entity;
     }
 
     public function getDocument($documentId)
@@ -148,9 +173,16 @@ use DomainAwareTrait;
         $target = clone $document;
         $sections = $target->getSections();
         $target->setSections(array());
-        //transaction start
-        $this->save($target);
-        $this->getSectionRepository()->saveSections($sections, false);
-        //transaction end
+
+        $this->beginTransaction();
+        try {
+            $this->save($target);
+            $this->getSectionRepository()->saveSections($sections, false);
+            $this->commit();
+        } catch (Exception $ex) {
+            $this->rollback();
+            throw $ex;
+        }
+        return true;
     }
 }
