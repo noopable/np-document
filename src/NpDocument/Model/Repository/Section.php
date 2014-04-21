@@ -5,14 +5,15 @@ use Flower\Domain\DomainAwareInterface;
 use Flower\Domain\DomainAwareTrait;
 use Flower\Model\AbstractDbTableRepository;
 use Flower\Model\AbstractEntity;
-use Zend\Db\TableGateway\TableGatewayInterface;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use NpDocument\Exception\RuntimeException;
 use NpDocument\Exception\DomainException;
 use NpDocument\Model\Document\DocumentInterface;
 use NpDocument\Model\Section\Config;
 use NpDocument\Model\Section\SectionInterface;
 use NpDocument\Model\Section\SectionPluginManager;
+use Zend\Db\TableGateway\TableGatewayInterface;
+use Zend\ServiceManager\Exception\ServiceNotFoundException;
+use Zend\StdLib\ArrayUtils;
 
 class Section extends AbstractDbTableRepository implements DomainAwareInterface
 {
@@ -76,18 +77,12 @@ class Section extends AbstractDbTableRepository implements DomainAwareInterface
         return $this->getSectionPluginManager()->get($type, $config);
     }
 
-    public function saveSections(array $sections, $transaction = true)
+    public function saveSections(array $sections)
     {
-        if ($transaction) {
-            //start transaction
-        }
         foreach ($sections as $section) {
             if ($section instanceof SectionInterface) {
                 $this->saveSection($section);
             }
-        }
-        if ($transaction) {
-            //end transaction
         }
     }
 
@@ -133,7 +128,8 @@ class Section extends AbstractDbTableRepository implements DomainAwareInterface
     {
         $where['global_document_id'] = $document->getGlobalDocumentId();
 
-        $sections = $this->getSectionRepository()->getCollection($where);
+        $collection = $this->getSectionRepository()->getCollection($where);
+        $sections = ArrayUtils::iteratorToArray($collection, false);
         $document->setSections($sections);
     }
 

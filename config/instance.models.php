@@ -4,6 +4,7 @@ return array(
         //リソースfactoryでブリッジ指定したサービスは、Aliasを張ることでDIで使用可能になる。
         //このalias指定がないと、パラメーターとして指定したときインスタンスと解釈してくれない。
         'dbAdapter' => 'Zend\Db\Adapter\Adapter',
+        'DocumentLinkTable' => 'Zend\Db\TableGateway\TableGateway',
         'DocumentTable' =>   'NpDocument\Model\Document\DocumentTableGateway',
         'SectionTable' => 'Zend\Db\TableGateway\TableGateway',
         'SandboxTable' =>   'Zend\Db\TableGateway\TableGateway',
@@ -30,6 +31,34 @@ return array(
         'injections' => array(
             'setSectionRepository' => array(
                 array('NpDocument\Model\Repository\Section'),
+            ),
+            'setDocumentLinkRepository' => array(
+                array('NpDocument\Model\Repository\DocumentLink'),
+            ),
+        ),
+    ),
+    'DocumentLinkTable' => array(
+        'parameters' => array(
+            'table' => 'document_link',
+            'adapter' => 'dbAdapter',
+        ),
+    ),
+    'NpDocument\Model\DocumentLink' => array(
+        'parameters' => array(
+            'array' => array(),
+        ),
+    ),
+    'NpDocument\Model\Repository\DocumentLink' => array(
+        'parameters' => array(
+            'name' => 'document',
+            'entityPrototype' => 'NpDocument\Model\DocumentLink',
+            'tableGateway' => 'DocumentLinkTable',
+            'options' => array(
+                'select' => array(
+                    'order' => array(
+                        'priority' => 'DESC',
+                    ),
+                ),
             ),
         ),
     ),

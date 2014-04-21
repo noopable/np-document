@@ -7,12 +7,14 @@
  */
 namespace NpDocument\Model\Repository;
 
+use Flower\Domain\DomainAwareInterface;
+use Flower\Domain\DomainAwareTrait;
+use Flower\Model\SelectStrategyInterface;
 use Flower\Model\AbstractDbTableRepository;
 use NpDocument\Exception\DomainException;
 use NpDocument\Model\Document\AbstractDocument;
 use NpDocument\Model\Document\DocumentInterface;
-use Flower\Domain\DomainAwareInterface;
-use Flower\Domain\DomainAwareTrait;
+use NpDocument\Model\Repository\DocumentLink as DocumentLinkRepository;
 use NpDocument\Model\Repository\Section as SectionRepository;
 use Zend\Db\TableGateway\TableGatewayInterface;
 
@@ -34,6 +36,8 @@ class Document extends AbstractDbTableRepository implements DomainAwareInterface
 use DomainAwareTrait;
 
     protected $sectionRepository;
+
+    protected $documentLinkRepository;
 
     /**
      *　現在対象にしている組織識別ID
@@ -69,6 +73,17 @@ use DomainAwareTrait;
         return $this->domainId;
     }
 
+    public function initialize()
+    {
+        parent::initialize();
+        if (isset($this->sectionRepository)) {
+            $this->sectionRepository->initialize();
+        }
+        if (isset($this->documentLinkRepository)) {
+            $this->documentLinkRepository->initialize();
+        }
+    }
+
     public function setSectionRepository(SectionRepository $sectionRepository)
     {
         $this->sectionRepository = $sectionRepository;
@@ -79,14 +94,19 @@ use DomainAwareTrait;
         return $this->sectionRepository;
     }
 
+    public function setDocumentLinkRepository(DocumentLinkRepository $documentLinkRepository)
+    {
+        $this->documentLinkRepository = $documentLinkRepository;
+    }
+
+    public function getDocumentLinkRepository()
+    {
+        return $this->documentLinkRepository;
+    }
+
     public function createDocument($params = null)
     {
 
-    }
-
-    public function getDocumentDigestCollection($where, $limit)
-    {
-        //Baseセクション、DigestセクションだけをJOINしたDocumentCollection
     }
 
     /**
@@ -97,14 +117,24 @@ use DomainAwareTrait;
     public function getDocumentCollection ($where, $limit = null)
     {
         $where['domain_id'] = $this->getDomainId();
+        $resultSet = $this->getCollection($where);
+        return $this->getCollectionFromResultSet($resultSet);
     }
+
+    public function getDocumentWithStrategy(SelectStrategyInterface $strategy)
+    {
+        $resultSet = $this->getCollectionWithStrategy($strategy);
+        return $this->getCollectionFromResultSet($resultSet);
+    }
+
 
     public function getDigestCollection($where, $limit)
     {
         $digestStrategy = new DigestStrategy;
         $digestStrategy->setWhere($where);
         $digestStrategy->setLimit($limit);
-        return $this->getCollectionWithStrategy($digestStrategy);
+        $resultSet = $this->getCollectionWithStrategy($digestStrategy);
+        return $this->getCollectionFromResultSet($resultSet);
     }
 
     public function getDocumentByName($documentName)
@@ -116,6 +146,7 @@ use DomainAwareTrait;
         );
         $entity = $this->getEntity($where);
         $this->getSectionRepository()->retrieveBranchSections($entity);
+        $this->getDocumentLinkRepository()->retrieveDocumentLinks($entity);
         return $entity;
     }
 
@@ -125,7 +156,22 @@ use DomainAwareTrait;
         //branchはcurrent　branchに限定する。
         $globalDocumentId = $this->getGlobalDocumentId($documentId);
         $entity = $this->getEntity(array('global_document_id' => $globalDocumentId));
+        return $this->retrieveRelations($entity);
+    }
+
+    public function getCollectionFromResultSet($resultSet)
+    {
+        $collection = array();
+        foreach ($resultSet as $entity) {
+            $collection[] = $this->retrieveRelations($entity);
+        }
+        return $collection;
+    }
+
+    public function retrieveRelations($entity)
+    {
         $this->getSectionRepository()->retrieveBranchSections($entity);
+        $this->getDocumentLinkRepository()->retrieveDocumentLinks($entity);
         return $entity;
     }
 
@@ -171,13 +217,16 @@ use DomainAwareTrait;
     public function saveDocument(DocumentInterface $document)
     {
         $target = clone $document;
+        //配列だけど、クローンするとプロパティもクローンする？
         $sections = $target->getSections();
+        $links = $target->getLinks();
         $target->setSections(array());
 
         $this->beginTransaction();
         try {
             $this->save($target);
             $this->getSectionRepository()->saveSections($sections, false);
+            $this->getDocumentLinkRepository()->saveLinks($links);
             $this->commit();
         } catch (Exception $ex) {
             $this->rollback();

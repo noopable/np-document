@@ -29,6 +29,8 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
 
     protected $sections;
 
+    protected $links;
+
     protected $currentBranchId;
 
     protected $currentSections;
@@ -46,7 +48,7 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
             if (isset($this->domain_id) && $this->document_id) {
                 $this->global_document_id = self::generateGlobalDocumentId($this->domain_id, $this->document_id);
             } else {
-                throw DomainException('This document has no identity');
+                throw new DomainException('This document has no identity');
             }
         }
         return $this->global_document_id;
@@ -97,6 +99,16 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
     public function setSections(array $sections)
     {
         $this->sections = $sections;
+    }
+
+    public function setLinks(array $links)
+    {
+        $this->links = $links;
+    }
+
+    public function getLinks()
+    {
+        return $this->links;
     }
 
     /**
@@ -160,7 +172,7 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
         if (!isset($this->sections)) {
             return;
         }
-        
+
         $branchId = $this->getCurrentBranchId();
         if (null === $branchId) {
             $this->currentSections = $this->sections;
