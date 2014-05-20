@@ -29,7 +29,7 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
 
     protected $sections;
 
-    protected $links;
+    protected $links = array();
 
     protected $currentBranchId;
 
@@ -109,6 +109,46 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
     public function getLinks()
     {
         return $this->links;
+    }
+
+    public function getLinkWithUrlHelper($urlHelper, $default = null)
+    {
+        $links = $this->getLinks();
+        foreach ($links as $li) {
+            $route = null;
+            $routeParams = array();
+            if (isset($li->route) || isset($li->route_params)) {
+                $route = isset($li->route) ? $li->route : 'public';
+                $routeParams = $li->getRouteParams($entry);
+            } else {
+                continue;
+            }
+            switch ($li->status) {
+                case 'current':
+                    return $this->url()->fromRoute($route, $routeParams);
+                case 'draft':
+                    if (isset($tmpLink)) {
+                        break;
+                    }
+                    $tmpLink = $this->url()->fromRoute($route, $routeParams);
+                    break;
+                default:
+                    if (isset($overdue)) {
+                        break;
+                    }
+                    $overdue = $this->url()->fromRoute($route, $routeParams);
+                    break;
+            }
+        }
+        if (isset($tmpLink)) {
+            return $tmpLink;
+        }
+
+        if (isset($overdue)) {
+            return $overdue;
+        }
+
+        return $default;
     }
 
     /**
