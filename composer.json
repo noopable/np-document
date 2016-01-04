@@ -19,10 +19,9 @@
         }
     ],
     "require": {
-        "php": ">=5.4.10",
+        "php": ">=5.5",
         "noopable/flower": "dev-master",
-        "zendframework/zendframework": "dev-master",
-        "phpunit/phpunit": "~3.7"
+        "zendframework/zendframework": "~2.5"
     },
     "autoload": {
         "psr-0": {
