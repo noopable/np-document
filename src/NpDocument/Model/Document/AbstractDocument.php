@@ -64,11 +64,11 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
      */
     public static function generateGlobalDocumentId($domainId, $documentId)
     {
-        if (!is_int($domainId) || $domainId <= 0) {
+        if (!is_int($domainId) || $domainId < 0) {
             throw new DomainException('domain_id is invalid it should be unsigned integer');
         }
 
-        if (!is_int($documentId) || $documentId <= 0) {
+        if (!is_int($documentId) || $documentId < 0) {
             throw new DomainException('document_id is invalid it should be unsigned integer');
         }
 
