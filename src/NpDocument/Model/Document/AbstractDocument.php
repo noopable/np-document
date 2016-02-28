@@ -119,24 +119,24 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
             $routeParams = array();
             if (isset($li->route) || isset($li->route_params)) {
                 $route = isset($li->route) ? $li->route : 'public';
-                $routeParams = $li->getRouteParams($entry);
+                $routeParams = $li->getRouteParams($this->domain_id, $this->document_id);
             } else {
                 continue;
             }
             switch ($li->status) {
                 case 'current':
-                    return $this->url()->fromRoute($route, $routeParams);
+                    return $urlHelper->fromRoute($route, $routeParams);
                 case 'draft':
                     if (isset($tmpLink)) {
                         break;
                     }
-                    $tmpLink = $this->url()->fromRoute($route, $routeParams);
+                    $tmpLink = $urlHelper->fromRoute($route, $routeParams);
                     break;
                 default:
                     if (isset($overdue)) {
                         break;
                     }
-                    $overdue = $this->url()->fromRoute($route, $routeParams);
+                    $overdue = $urlHelper->fromRoute($route, $routeParams);
                     break;
             }
         }
