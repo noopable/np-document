@@ -29,6 +29,10 @@ interface DocumentInterface {
 
     public function getSections();
 
+    public function setLinks(array $links);
+
+    public function getLinks();
+
     public function setCurrentBranchId($branchId);
 
     public function getCurrentBranchId();
@@ -45,5 +49,5 @@ interface DocumentInterface {
     public function addTask($task);
 
     public function removeTask($task);
-    
+
 }
