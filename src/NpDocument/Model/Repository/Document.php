@@ -225,8 +225,13 @@ use DomainAwareTrait;
         $this->beginTransaction();
         try {
             $this->save($target);
-            $this->getSectionRepository()->saveSections($sections, false);
-            $this->getDocumentLinkRepository()->saveLinks($links);
+            if ($sections) {
+                $this->getSectionRepository()->saveSections($sections, false);
+            }
+            
+            if ($links) {
+                $this->getDocumentLinkRepository()->saveLinks($links);
+            }
             $this->commit();
         } catch (Exception $ex) {
             $this->rollback();
