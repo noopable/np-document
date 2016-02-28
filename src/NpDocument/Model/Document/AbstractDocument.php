@@ -27,7 +27,7 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
         'revision' => 'NpDocument\Model\Document\Service\Revision',
     );
 
-    protected $sections;
+    protected $sections = array();
 
     protected $links = array();
 
