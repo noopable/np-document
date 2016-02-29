@@ -9,9 +9,9 @@
 namespace NpDocument\Model\Repository;
 
 use Flower\Model\AbstractDbTableRepository;
-use NpDocument\Exception\DomainException;
-use NpDocument\Model\Document\AbstractDocument;
+use NpDocument\Model\Document\DocumentInterface;
 use NpDocument\Model\DocumentLink as Link;
+use NpDocument\Model\Exception\RuntimeException as ModelRuntimeException;
 use Flower\Domain\DomainAwareInterface;
 use Flower\Domain\DomainAwareTrait;
 use Zend\Stdlib\ArrayUtils;
@@ -26,10 +26,11 @@ class DocumentLink extends AbstractDbTableRepository implements DomainAwareInter
     use DomainAwareTrait;
 
     /**
+     *
      * note: AbstractDocument has domain_id and document_id
      * @param \NpDocument\Model\Document\AbstractDocument $document
      */
-    public function retrieveDocumentLinks(AbstractDocument $document)
+    public function retrieveDocumentLinks(DocumentInterface $document)
     {
         $links = $this->getDocumentLinks($document->document_id, $document->domain_id);
         $document->setLinks($links);
@@ -60,6 +61,23 @@ class DocumentLink extends AbstractDbTableRepository implements DomainAwareInter
 
     public function saveLink(Link $link)
     {
-        return $this->save($link);
+        $link->hash = md5(uniqid(spl_object_hash($link)));
+        $res = $this->save($link);
+        $saved = $this->getEntity(['hash' => $link->hash]);
+        //見つからない場合・・・
+        if (! $saved) {
+            throw new ModelRuntimeException('item lost at save process');
+        }
+        foreach ($saved as $key => $val) {
+            $link->{$key} = $val;
+        }
+        return $res;
+    }
+
+    public function associateDocument(DocumentInterface $document, Link $link)
+    {
+        $link->domain_id = $document->domain_id;
+        $link->document_id = $document->document_id;
+        return $this;
     }
 }

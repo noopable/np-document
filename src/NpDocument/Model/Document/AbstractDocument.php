@@ -12,6 +12,8 @@ use Flower\TimeUtils;
 use NpDocument\Model\Exception\DomainException;
 use NpDocument\Model\Exception\RuntimeException;
 use NpDocument\Model\Document\DocumentInterface;
+use NpDocument\Model\DocumentLink;
+use NpDocument\Model\Section\SectionInterface;
 
 /**
  *
@@ -20,10 +22,25 @@ use NpDocument\Model\Document\DocumentInterface;
 abstract class AbstractDocument extends AbstractEntity implements DocumentInterface
 {
 
+    /**
+     *
+     * @see \NpDocument\Model\Document\Service\Create
+     * @var array
+     */
     protected $defaultSectionsDef;
 
     protected $services = array(
         'branch' => 'NpDocument\Model\Document\Service\Branch',
+        /**
+         * create editについては標準的な処理を作成してある
+         * 個別のニーズについては、ドキュメント毎に好きなServiceをセットすればよい。
+         *
+         * repository側では、新規作成時にcreate_initを呼んでくるので、適切に対処する。
+         *
+         */
+        'create' => 'NpDocument\\Model\\Document\\Service\\Create',
+        'edit' => 'NpDocument\\Model\\Document\\Service\\Edit',
+        'repository' => 'NpDocument\Model\Document\Service\Repository',
         'revision' => 'NpDocument\Model\Document\Service\Revision',
     );
 
@@ -101,6 +118,11 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
         $this->sections = $sections;
     }
 
+    public function addSection(SectionInterface $section)
+    {
+        $this->sections[] = $section;
+    }
+
     public function setLinks(array $links)
     {
         $this->links = $links;
@@ -109,6 +131,13 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
     public function getLinks()
     {
         return $this->links;
+    }
+
+    public function addLink(DocumentLink $link)
+    {
+        $link->document_id = $this->document_id;
+        $link->domain_id = $this->domain_id;
+        $this->links[] = $link;
     }
 
     public function getLinkWithUrlHelper($urlHelper, $default = null)
@@ -254,6 +283,8 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
                 //  - Service can omit setService
                 //  - We can set service with servicename from external scope.
                 $service = new $service($this, $serviceName);
+            } catch (\TypeError $error) {
+                throw new RuntimeException('type error occured. prefer service constructor to have compatile with AbstractService. Or you can set instance directory with setService');
             } catch (\Exception $ex) {
                 throw new RuntimeException('prefer service constructor to have compatile with AbstractService. Or you can set instance directory with setService', $ex->getCode(), $ex);
             }
@@ -268,5 +299,16 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
         }
         // at last, invoke
         return call_user_func_array(array($service, $methodName), $arguments);
+    }
+
+    public function offsetSet($index, $newval)
+    {
+        switch ($index) {
+            case "domain_id":
+            case "document_id":
+                $newval = (int) $newval;
+                break;
+        }
+        parent::offsetSet($index, $newval);
     }
 }

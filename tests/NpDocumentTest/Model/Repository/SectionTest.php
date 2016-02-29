@@ -24,6 +24,10 @@ class SectionTest extends \PHPUnit_Framework_TestCase
         $proto = new EntityPrototype;
         $table = $this->getMock('Zend\Db\TableGateway\TableGatewayInterface');
         $this->object = new Section('section', $proto, $table);
+
+        $pluginManager = new SectionPluginManager;
+        $pluginManager->setInvokableClass('generic', 'NpDocument\\Model\\Section\\SectionClass\\Section');
+        $this->object->setSectionPluginManager($pluginManager);
     }
 
     /**
@@ -47,15 +51,6 @@ class SectionTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($pluginManager, $prop->getValue($this->object));
     }
 
-    /**
-     * 
-     * @expectedException NpDocument\Exception\RuntimeException
-     */
-    public function testGetSectionPluginManagerWithoutInjection()
-    {
-        $this->object->getSectionPluginManager();
-    }
-    
     /**
      * @covers NpDocument\Model\Repository\Section::getSectionPluginManager
      */
@@ -84,29 +79,42 @@ class SectionTest extends \PHPUnit_Framework_TestCase
                ),
             ),
         );
-        
+
         $oConfig = new \Zend\Di\Config($config);
         $di = new \Zend\Di\Di;
         $oConfig->configure($di);
-        
+
         $object = $di->get('NpDocument\Model\Repository\Section');
         $this->assertInstanceOf('NpDocument\Model\Repository\Section', $object);
-        
+
         $plugin = $object->getSectionPluginManager();
-        
+
         $this->assertInstanceOf('NpDocument\Model\Section\SectionPluginManager', $plugin);
     }
-    
+
     /**
      * @covers NpDocument\Model\Repository\Section::createSection
      */
     public function testCreateSection()
     {
-        $pluginManager = new SectionPluginManager;
-        $this->object->setSectionPluginManager($pluginManager);
         $section = $this->object->createSection();
         $this->assertInstanceOf('NpDocument\Model\Section\SectionClass\Section', $section);
     }
+
+    public function testCreateSectionWithParams()
+    {
+        /**
+         * createSectionでのデータ投入は実装されていない。
+         * createの仕事ではない。
+         */
+        $type = 'generic';
+        $params = [
+            'section_name' => 'generic',
+        ];
+        $section = $this->object->createSection($type, $params);
+        $this->assertInstanceOf('NpDocument\Model\Section\SectionClass\Section', $section);
+    }
+
     /**
      * @covers NpDocument\Model\Repository\Section::saveSections
      * @todo   Implement testSaveSections().
@@ -121,14 +129,82 @@ class SectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers NpDocument\Model\Repository\Section::saveSection
-     * @todo   Implement testSaveSection().
      */
     public function testSaveSection()
     {
-        // Remove the following lines when you implement this test.
+        $section = $this->object->createSection();
+        $section->section_class = "generic";
+        //table mock がコールされる
+        $this->object->saveSection($section);
+    }
+
+    /**
+     * @covers NpDocument\Model\Repository\Section::saveSection
+     */
+    public function testSaveSectionToSandboxDb()
+    {
+        /*
         $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+          '開発環境でのみ使用する。とりあえずで許して',
         );
+         *
+         */
+        $dbConnection = array(
+            'driver'         => 'Pdo',
+            'pdodriver'      => 'mysql',
+            'username' => 'admin',
+            'password' => 'admin',
+            'characterset' => 'UTF8',
+            'dbname' => 'sandbox',
+            'driver_options' => array(
+                //PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''
+            ),
+            'host' => 'localhost',
+        );
+        $proto = new EntityPrototype;
+        $adapter = new \Zend\Db\Adapter\Adapter($dbConnection);
+        $table = new \Zend\Db\TableGateway\TableGateway('section', $adapter);
+
+        $repository = new Section('section', $proto, $table);
+
+        $pluginManager = new SectionPluginManager;
+        $repository->setSectionPluginManager($pluginManager);
+        $section = $repository->createSection();
+
+        /**
+         * $domainId
+         * $documentId
+         * $sectionName
+         * $revision
+         *
+         * $section->domain_id = 0;
+         * $section->document_id = 0;
+         * $section->section_name = 'digest';
+         *
+         * 先行して、domain_id = 0 document_id = 0のドキュメントがdocumentテーブルに必要。
+         * データベース側の制約。
+         * モックの場合は意識しなくても良い。
+         *
+         * ちなみに、tearDownでレコードを消しておかないと、自動的にupdateが選択されるので、動作の検証としては不十分
+         * データベースモックは用意したほうがいいと思う。
+         *
+         * DuplicateEntryだと！
+         */
+
+        /**
+         * documentの仕様で、document_idの最小値は1
+         * section_revisionの最低値はトリガーの関係で１になる。
+         */
+        $section->getDataContainer()->originate(0, 1, 'digest', 1);
+        $this->assertEquals(0, $section->domain_id);
+        $this->assertEquals(1, $section->document_id);
+
+        //editor_idはemailテーブルのprimary_person_idか。
+        $section->editor_id = 0;
+
+        $section->section_class = "generic";
+        //table mock がコールされる
+        $repository->saveSection($section);
     }
 
     /**
@@ -148,8 +224,6 @@ class SectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testRetrieveSectionFromDataContainer()
     {
-        $pluginManager = new SectionPluginManager;
-        $this->object->setSectionPluginManager($pluginManager);
         $dataContainer = new DataContainer;
         $dataContainer->section_class = 'section';
         $section = $this->object->retrieveSectionFromDataContainer($dataContainer);
@@ -161,13 +235,11 @@ class SectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testRetrieveSectionFromBareboneDataContainer()
     {
-        $pluginManager = new SectionPluginManager;
-        $this->object->setSectionPluginManager($pluginManager);
         $dataContainer = new DataContainer;
         $section = $this->object->retrieveSectionFromDataContainer($dataContainer);
         $this->assertInstanceOf('NpDocument\Model\Section\SectionClass\Section', $section);
     }
-    
+
     /**
      * @covers NpDocument\Model\Repository\Section::retrieveSections
      * @todo   Implement testRetrieveSections().

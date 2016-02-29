@@ -14,6 +14,7 @@ use Flower\Model\AbstractDbTableRepository;
 use NpDocument\Exception\DomainException;
 use NpDocument\Model\Document\AbstractDocument;
 use NpDocument\Model\Document\DocumentInterface;
+use NpDocument\Model\Exception\RuntimeException as ModelRuntimeException;
 use NpDocument\Model\Repository\DocumentLink as DocumentLinkRepository;
 use NpDocument\Model\Repository\Section as SectionRepository;
 use Zend\Db\TableGateway\TableGatewayInterface;
@@ -55,10 +56,11 @@ use DomainAwareTrait;
     public function setDomainId($domainId = null)
     {
         if (null === $domainId) {
-            $domainId = $this->getDomain()->getDomainId();
-        } else {
-            if ($domainId !== $this->getDomain()->getDomainId()) {
-                throw new DomainException('cant\'t set domainId mismatched to injected domain');
+            $domain = $this->getDomain();
+            if (null === $domain) {
+                $domainId = 0;
+            } else {
+                $domainId = $domain->getDomainId();
             }
         }
 
@@ -106,7 +108,39 @@ use DomainAwareTrait;
 
     public function createDocument($params = null)
     {
+        $protoType = $this->getEntityPrototype();
+        $document = clone $protoType;
 
+        if (isset($params['domain_id'])) {
+            $domainId = $document->domain_id = $params['domain_id'];
+            unset($params['domain_id']);
+        } elseif (isset($document->domain_id)) {
+            //for util
+            $domainId = $document->domain_id;
+        } else {
+            $domainId = $document->domain_id = $this->getDomainId();
+        }
+
+        if (isset($params['document_id'])) {
+            $documentId = $document->document_id = $params['document_id'];
+            unset($params['document_id']);
+        } elseif (isset($document->document_id)) {
+            $documentId = $document->document_id;
+        }
+        //document_idはnullで構わない。
+        if (isset($documentId) && !isset($document->global_document_id)) {
+            $document->global_document_id = AbstractDocument::generateGlobalDocumentId($domainId, $documentId);
+        }
+
+        if ($document instanceof AbstractDocument) {
+            $document->create_init($this);
+        }
+
+        if ($params) {
+            $document->exchangeArray($params);
+        }
+
+        return $document;
     }
 
     /**
@@ -189,7 +223,7 @@ use DomainAwareTrait;
      * すべてのブランチ、すべてのセクションを含む
      * @param type $globalDocumentId
      */
-    public function getHoleDocument($documentId)
+    public function getWholeDocument($documentId)
     {
         $globalDocumentId = $this->getGlobalDocumentId($documentId);
         $entity = $this->getEntity(array('global_document_id' => $globalDocumentId));
@@ -217,6 +251,7 @@ use DomainAwareTrait;
     public function saveDocument(DocumentInterface $document)
     {
         $target = clone $document;
+        $target->object_hash = md5(uniqid(spl_object_hash($document)));
         //配列だけど、クローンするとプロパティもクローンする？
         $sections = $target->getSections();
         $links = $target->getLinks();
@@ -224,16 +259,35 @@ use DomainAwareTrait;
 
         $this->beginTransaction();
         try {
-            $this->save($target);
-            if ($sections) {
-                $this->getSectionRepository()->saveSections($sections, false);
+            $res = $this->save($target);
+
+            if (! $res) {
+                throw new ModelRuntimeException('save failed please check document db log');
             }
-            
+            /**
+             * この段階でinsertが行われてlast_insert_idがとれるのか、
+             * identifierが有効でupdateが行われたのかを判断するのは難しい。
+             *
+             * データベース側にパンくずを巻いておいてトリガーで自動作成されたデータを回収する。
+             */
+            $saved = $this->getEntity(['object_hash' => $target->object_hash]);
+            //見つからない場合・・・
+            if (! $saved) {
+                throw new ModelRuntimeException('item lost at save process');
+            }
+            foreach ($saved as $key => $val) {
+                $document->{$key} = $val;
+            }
+
+            if ($sections) {
+                $this->getSectionRepository()->saveSections($sections, $document);
+            }
+
             if ($links) {
                 $this->getDocumentLinkRepository()->saveLinks($links);
             }
             $this->commit();
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             $this->rollback();
             throw $ex;
         }

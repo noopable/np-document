@@ -63,6 +63,13 @@ class Section extends AbstractDbTableRepository implements DomainAwareInterface
         return $this->sectionPluginManager;
     }
 
+    /**
+     * createSectionではデータ投入までは行わない
+     *
+     * @param string $type
+     * @param array $params
+     * @return type
+     */
     public function createSection($type = null, array $params = array())
     {
         if (null === $type) {
@@ -74,20 +81,43 @@ class Section extends AbstractDbTableRepository implements DomainAwareInterface
         }
         $config = new Config($params);
 
-        return $this->getSectionPluginManager()->get($type, $config);
+        /**
+         * AbstractPluginManager::createFromInvokable
+         * にてconfigureされる
+         */
+        $section = $this->getSectionPluginManager()->get($type, $config);
+        //初期値を設定
+        $section->section_rev = 1;
+        return $section;
     }
 
-    public function saveSections(array $sections)
+    public function associateDocument(DocumentInterface $document, SectionInterface $section)
+    {
+        $dataContainer = $section->getDataContainer();
+        $dataContainer->originate(
+                $document->domain_id,
+                $document->document_id,
+                $dataContainer->section_name,
+                $dataContainer->section_rev,
+                true);
+        return $this;
+    }
+
+
+    public function saveSections(array $sections, DocumentInterface $document = null)
     {
         foreach ($sections as $section) {
             if ($section instanceof SectionInterface) {
-                $this->saveSection($section);
+                $this->saveSection($section, $document);
             }
         }
     }
 
-    public function saveSection(SectionInterface $section)
+    public function saveSection(SectionInterface $section, DocumentInterface $document = null)
     {
+        if (isset($document)) {
+            $this->associateDocument($document, $section);
+        }
         $dataContainer = $section->getDataContainer();
         return $this->save($dataContainer);
     }

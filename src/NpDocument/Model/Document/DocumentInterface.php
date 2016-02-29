@@ -9,6 +9,8 @@
 
 namespace NpDocument\Model\Document;
 
+use NpDocument\Model\Section\SectionInterface;
+
 /**
  *
  * @author tomoaki
@@ -24,6 +26,8 @@ interface DocumentInterface {
     const TASK_PUBLISH = 'publish';
 
     public function getGlobalDocumentId();
+
+    public function addSection(SectionInterface $section);
 
     public function setSections(array $sections);
 

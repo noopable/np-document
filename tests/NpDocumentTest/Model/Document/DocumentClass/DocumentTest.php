@@ -28,15 +28,13 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
     protected function tearDown()
     {
     }
-    
+
     public function testConcrete()
     {
         $expectedDraft = array(
             // section_name => section_class | array section builddef for SectionPluginManager
-            'base' => 'Base', 
-            'tag' => array(
-                'section_class' => 'Tag',
-            )
+            'digest' => 'generic',
+            'body' => 'generic',
         );
         $this->assertEquals($expectedDraft, TestTool::getPropertyValue($this->object, 'defaultSectionsDef'));
     }

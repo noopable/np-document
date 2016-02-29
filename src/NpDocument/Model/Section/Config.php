@@ -10,6 +10,7 @@
 namespace NpDocument\Model\Section;
 
 use Flower\Model\AbstractEntity;
+
 /**
  * Configure Section object
  *
@@ -22,12 +23,12 @@ class Config {
      * @var array
      */
     protected $config;
-    
+
     public function __construct(array $config)
     {
         $this->config = $config;
     }
-    
+
     public function configure(SectionInterface $section)
     {
         if (isset($this->config['data_container'])) {
@@ -36,7 +37,7 @@ class Config {
             } else {
                 $dataContainer = $this->config['data_container'];
             }
-            
+
             if ($dataContainer instanceof AbstractEntity) {
                 $section->setDataContainer($dataContainer);
             }

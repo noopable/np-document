@@ -46,7 +46,8 @@ class DataContainer extends AbstractEntity
         'domain_id',
         'document_id',
         'section_name',
-        'section_rev',
+        //インスタンスを取得してからリビジョンアップするという使い方をする
+        //'section_rev',
     );
 
     protected $setterGetterColumns = array(
@@ -76,6 +77,7 @@ class DataContainer extends AbstractEntity
         'status' => 'status',
         'priority' => 'priority',
         'lastupdated' => 'lastupdated',
+        'object_hash' => 'object_hash',
         'template_name' => 'template_name',
         'section_to_string' => 'section_to_string',
         'section_note' => 'section_note',
@@ -89,6 +91,11 @@ class DataContainer extends AbstractEntity
     public function getIdentifier()
     {
         return $this->identifier;
+    }
+
+    public function getColumns()
+    {
+        return $this->columns;
     }
 
     /**

@@ -17,12 +17,23 @@ use NpDocument\Model\Document\DocumentInterface;
 abstract class AbstractService {
     protected $document;
 
-    protected $name = 'Abstract';
+    protected $name;
 
     public function __construct(DocumentInterface $document, $name = null)
     {
         if (null !== $name) {
             $this->name = $name;
+        }
+
+        /**
+         * AbstractDocument::__call側で自動処理するので、servicesに登録があれば、
+         * この処理は実際には使われない可能性が高い。
+         *
+         * @var type
+         */
+        if (!isset($this->name)) {
+            $names = explode('\\', get_class($this));
+            $this->name = array_pop($names);
         }
 
         $this->document = $document;

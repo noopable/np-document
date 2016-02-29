@@ -14,11 +14,17 @@ use NpDocument\Model\Document\AbstractDocument;
  */
 class Document extends AbstractDocument
 {
+    /*
+     * @see NpDocument\Model\Document\Service\Create
+     */
     protected $defaultSectionsDef = array(
         // section_name => section_class | array section builddef for SectionPluginManager
-        'base' => 'Base',
-        'tag' => array(
-            'section_class' => 'Tag',
-        ),
+        'digest' => 'generic',
+        'body' => 'generic',
+        /**
+         * another?
+         * acl
+         * relay
+         */
     );
 }
