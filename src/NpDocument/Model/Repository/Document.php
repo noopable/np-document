@@ -50,7 +50,7 @@ use DomainAwareTrait;
 
     public function getGlobalDocumentId($documentId)
     {
-        return AbstractDocument::generateGlobalDocumentId($this->getDomainId(), $documentId);
+        return AbstractDocument::generateGlobalDocumentId((int) $this->getDomainId(), (int) $documentId);
     }
 
     public function setDomainId($domainId = null)
