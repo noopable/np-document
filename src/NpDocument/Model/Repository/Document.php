@@ -151,7 +151,7 @@ use DomainAwareTrait;
     public function getDocumentCollection ($where, $limit = null)
     {
         $where['domain_id'] = $this->getDomainId();
-        $resultSet = $this->getCollection($where);
+        $resultSet = $this->getCollection($where, $limit);
         return $this->getCollectionFromResultSet($resultSet);
     }
 
