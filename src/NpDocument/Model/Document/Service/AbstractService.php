@@ -33,7 +33,7 @@ abstract class AbstractService {
          */
         if (!isset($this->name)) {
             $names = explode('\\', get_class($this));
-            $this->name = array_pop($names);
+            $this->name = lcfirst(array_pop($names));
         }
 
         $this->document = $document;
