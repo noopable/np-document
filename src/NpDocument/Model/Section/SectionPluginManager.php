@@ -17,11 +17,11 @@ use NpDocument\Model\Section\SectionInterface;
  * @author tomoaki
  */
 class SectionPluginManager extends AbstractPluginManager {
-    
+
     protected $invokableClasses = array(
-       //'generic' => 'NpDocument\Model\Section\SectionClass\Section',
+       'generic' => 'NpDocument\Model\Section\SectionClass\Section',
     );
-    
+
     /**
      * Whether or not to share by default
      *
@@ -32,28 +32,28 @@ class SectionPluginManager extends AbstractPluginManager {
      * クラスを配置する namespace as prefix
      * 他の場所のクラスを使いたいときは、直接getで取得するか、
      * 同じnamespaceにプロキシを配置する。
-     * 
-     * @var string 
+     *
+     * @var string
      */
     protected $pluginNameSpace = 'NpDocument\Model\Section\SectionClass';
-    
+
     /**
      * ServiceLocatorなどの取得にグローバルServiceLocatorをpeeringして使う
-     * 
+     *
      * @var bool
      */
     protected $retrieveFromPeeringManagerFirst = false;
-    
+
     public function setPluginNameSpace($pluginNameSpace)
     {
         $this->pluginNameSpace = (string) $pluginNameSpace;
     }
-    
+
     public function getPluginNameSpace()
     {
         return $this->pluginNameSpace;
     }
-    
+
     /**
      * Retrieve a service from the manager by name
      *
@@ -75,7 +75,7 @@ class SectionPluginManager extends AbstractPluginManager {
 
         return parent::get($name, $options, $usePeeringServiceManagers);
     }
-    
+
     public function autoAddInvokableClassByNamespace($name)
     {
         if (($pluginNameSpace = $this->getPluginNameSpace()) && (strpos($pluginNameSpace, $name) !== 0)) {
@@ -102,10 +102,10 @@ class SectionPluginManager extends AbstractPluginManager {
         if (($pluginNameSpace = $this->getPluginNameSpace()) && (strpos($pluginNameSpace, $name) !== 0)) {
             $name = rtrim($pluginNameSpace, '\\') . '\\' . $name;
         }
-        
+
         return parent::get($name, $options, $usePeeringServiceManagers);
     }
-    
+
     public function validatePlugin($plugin) {
         if ($plugin instanceof SectionInterface) {
             return true;

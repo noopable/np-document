@@ -50,15 +50,19 @@ class Section extends AbstractDbTableRepository implements DomainAwareInterface
         parent::__construct($name, $entityPrototype, $tableGateway);
     }
 
-    public function setSectionPluginManager(SectionPluginManager $sectionPluginManager)
+    public function setSectionPluginManager(SectionPluginManager $sectionPluginManager = null)
     {
+        if (!isset($sectionPluginManager)) {
+            $sectionPluginManager = new SectionPluginManager;
+        }
         $this->sectionPluginManager = $sectionPluginManager;
     }
 
     public function getSectionPluginManager()
     {
         if (!isset($this->sectionPluginManager)) {
-            throw new RuntimeException('Section Repository needs SectionPluginManager');
+            $this->setSectionPluginManager();
+            //throw new RuntimeException('Section Repository needs SectionPluginManager');
         }
         return $this->sectionPluginManager;
     }
