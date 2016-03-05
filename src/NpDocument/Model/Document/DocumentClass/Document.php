@@ -27,4 +27,31 @@ class Document extends AbstractDocument
          * relay
          */
     );
+
+    /**
+     * 具体的に使用するスキーマに合わせるとよいと思います。
+     * 
+     * @var type
+     */
+    protected $columns = array(
+        'global_document_id' =>'global_document_id',
+        'domain_id' =>'domain_id',
+        'document_id' =>'document_id',
+        'document_class' =>'document_class',
+        'document_name' =>'document_name',
+        'document_title' =>'document_title',
+        'document_digest' =>'document_digest',
+        'document_tag' =>'document_tag',
+        'author' =>'author',
+        'branch_set' =>'branch_set',
+        'branch' =>'branch',
+        'priority' =>'priority',
+        'permission' =>'permission',
+        'acl_resource_id' =>'acl_resource_id',
+        'published' =>'published',
+        'lastupdated' =>'lastupdated',
+        'object_hash' =>'object_hash',
+        //'links' => 'links',//populateを再帰実装してもよい。　DBupdate時は問題になる。
+        //'sections' => 'sections',//populateを再帰実装してもよい。
+    );
 }
