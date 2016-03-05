@@ -48,12 +48,37 @@ class Section implements SectionInterface
 
     public function __set($name, $value)
     {
+        if ($name === 'name') {
+            $name = 'section_name';
+        }
         return $this->getDataContainer()->offsetSet($name, $value);
     }
 
     public function __get($name)
     {
+        if ($name === 'name') {
+            $name = 'section_name';
+        }
         return $this->getDataContainer()->offsetGet($name);
+    }
+
+    public function populate($data)
+    {
+        return $this->getDataContainer()->populate($data);
+    }
+
+    public function getContent()
+    {
+        $dataContainer = $this->getDataContainer();
+        if (!$dataContainer->offsetExists('content')) {
+            return null;
+        }
+        return $dataContainer->offsetGet('content');
+    }
+
+    public function setContent($data)
+    {
+        $this->__set('content', (string) $data);
     }
 
     public function __isset($name)

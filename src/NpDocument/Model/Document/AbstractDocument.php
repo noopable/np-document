@@ -115,12 +115,38 @@ abstract class AbstractDocument extends AbstractEntity implements DocumentInterf
 
     public function setSections(array $sections)
     {
-        $this->sections = $sections;
+        $this->sections = array();
+        foreach ($sections as $section) {
+            $this->addSection($section);
+        }
     }
 
     public function addSection(SectionInterface $section)
     {
-        $this->sections[] = $section;
+        $this->sections[$section->name] = $section;
+    }
+
+    /**
+     *
+     * @param type $name
+     * @param type $callback to handle the SectionRepository::createSection($type, $params)
+     * @return SectionInterface
+     */
+    public function getSection($name, $callback = null)
+    {
+        if (! isset($this->sections[$name])) {
+            if (is_callable($callback)) {
+                $section = $callback($name);
+                if ($section instanceof SectionInterface ){
+                    $this->sections[$name] = $section;
+                    return $section;
+                }
+            } else {
+                return null;
+            }
+        }
+
+        return $this->sections[$name];
     }
 
     public function setLinks(array $links)

@@ -19,7 +19,6 @@ class Document extends AbstractDocument
      */
     protected $defaultSectionsDef = array(
         // section_name => section_class | array section builddef for SectionPluginManager
-        'digest' => 'generic',
         'body' => 'generic',
         /**
          * another?
@@ -30,7 +29,7 @@ class Document extends AbstractDocument
 
     /**
      * 具体的に使用するスキーマに合わせるとよいと思います。
-     * 
+     *
      * @var type
      */
     protected $columns = array(
