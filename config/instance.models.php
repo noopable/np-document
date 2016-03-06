@@ -64,7 +64,7 @@ return array(
     ),
     'SectionTable' => array(
         'parameters' => array(
-            'table' => 'document',
+            'table' => 'section',
             'adapter' => 'dbAdapter',
         ),
     ),
