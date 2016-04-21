@@ -1,6 +1,7 @@
 <?php
 namespace NpDocumentTest\Model\Repository;
 
+use NpDocument\Model\Document\DocumentClass\Document;
 use NpDocument\Model\Repository\Section;
 use NpDocument\Model\Section\DataContainer;
 use NpDocument\Model\Section\SectionClass\Section as EntityPrototype;
@@ -165,10 +166,13 @@ class SectionTest extends \PHPUnit_Framework_TestCase
         $adapter = new \Zend\Db\Adapter\Adapter($dbConnection);
         $table = new \Zend\Db\TableGateway\TableGateway('section', $adapter);
 
-        $repository = new Section('section', $proto, $table);
+        $repository = new Section('section', $proto->getDataContainer(), $table);
 
         $pluginManager = new SectionPluginManager;
         $repository->setSectionPluginManager($pluginManager);
+
+        $repository->initialize();
+
         $section = $repository->createSection();
 
         /**
@@ -201,10 +205,12 @@ class SectionTest extends \PHPUnit_Framework_TestCase
 
         //editor_idはemailテーブルのprimary_person_idか。
         $section->editor_id = 0;
-
+        $section->branch_set = '1';
         $section->section_class = "generic";
         //table mock がコールされる
         $repository->saveSection($section);
+
+        return $repository;
     }
 
     /**
@@ -254,14 +260,20 @@ class SectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers NpDocument\Model\Repository\Section::retrieveBranchSections
-     * @todo   Implement testRetrieveBranchSections().
+     * @depends testSaveSectionToSandboxDb
      */
-    public function testRetrieveBranchSections()
+    public function testRetrieveBranchSections($repository)
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        /*
+         * テスト環境のみの$repositoryを引き継いでいる。
+         *
+         */
+        $document = new Document;
+        $document->global_document_id = '000000-000001';
+        $document->branch = '1';
+        $repository->retrieveBranchSections($document);
+        $sections = $document->getSections();
+        $this->assertCount(1, $sections);
     }
 
     /**

@@ -169,8 +169,17 @@ class Section extends AbstractDbTableRepository implements DomainAwareInterface
 
     public function retrieveBranchSections(DocumentInterface $document)
     {
-        $branch = $document->branch;
-        $globalDocumentId = $document->getGlobalDocumentId();
-        //@todo branch_setに対するwhereを作成して取得
+        $where = [];
+        $sections = [];
+        /**
+         * @todo find_in_setで検索するべき
+         */
+        $where['branch_set'] = $document->branch;
+        $where['global_document_id'] = $document->getGlobalDocumentId();
+        $collection = $this->getCollection($where);
+        foreach ($collection as $entry) {
+            $sections[] = $this->retrieveSectionFromDataContainer($entry);
+        }
+        $document->setSections($sections);
     }
 }

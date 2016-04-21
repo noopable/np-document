@@ -200,17 +200,6 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    /**
-     * @covers NpDocument\Model\Repository\Document::getDigestCollection
-     * @todo   Implement testGetDigestCollection().
-     */
-    public function testGetDigestCollection()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-            'This test has not been implemented yet.'
-        );
-    }
 
     /**
      * @covers NpDocument\Model\Repository\Document::getDocumentByName
@@ -359,6 +348,20 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
          */
         $res = $repository->saveDocument($document);
         $this->assertTrue($res);
+
+        return $repository;
+    }
+
+    /**
+     * @covers NpDocument\Model\Repository\Document::getDigestCollection
+     * @todo   Implement testGetDigestCollection().
+     */
+    public function testGetDigestCollection()
+    {
+        // Remove the following lines when you implement this test.
+        $this->markTestIncomplete(
+            'This test has not been implemented yet.'
+        );
     }
 
     /**
